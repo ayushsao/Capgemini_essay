@@ -81,32 +81,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading: true
   });
   const [isClient, setIsClient] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    // Set client flag to prevent hydration issues
+    // Set client flag and hydration flag to prevent hydration issues
     setIsClient(true);
     
-    // Add a small delay to show the preloader
-    const timer = setTimeout(() => {
-      const storedUser = localStorage.getItem('user');
-      
-      if (storedUser) {
-        try {
+    // Ensure we're fully hydrated before accessing localStorage
+    const initializeAuth = () => {
+      try {
+        const storedUser = localStorage.getItem('user');
+        
+        if (storedUser) {
           const user = JSON.parse(storedUser);
+          console.log('🔄 Restored user from localStorage:', user);
           setAuthState({
             user,
             isAuthenticated: true,
             loading: false
           });
-        } catch (error) {
-          localStorage.removeItem('user');
+        } else {
           setAuthState(prev => ({ ...prev, loading: false }));
         }
-      } else {
+      } catch (error) {
+        console.error('❌ Error restoring user:', error);
+        localStorage.removeItem('user');
         setAuthState(prev => ({ ...prev, loading: false }));
+      } finally {
+        setIsHydrated(true);
       }
-    }, 1500); // Show preloader for at least 1.5 seconds
+    };
 
+    // Add a small delay to ensure proper hydration
+    const timer = setTimeout(initializeAuth, 100);
     return () => clearTimeout(timer);
   }, []);
 
@@ -114,9 +121,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAuthState(prev => ({ ...prev, loading: true }));
     
     console.log('🔍 Login attempt:', { email, password });
+    console.log('🌐 Environment:', typeof window !== 'undefined' ? 'client' : 'server');
     
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Ensure we're on the client side
+    if (typeof window === 'undefined') {
+      console.log('❌ Login attempted on server side');
+      setAuthState(prev => ({ ...prev, loading: false }));
+      return false;
+    }
     
     // Check stored credentials
     const credentials = getStoredCredentials();
@@ -283,7 +298,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         updateProfile
       }}
     >
-      {isClient ? children : <div>Loading...</div>}
+      {isClient && isHydrated ? children : (
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white'
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🎓</div>
+            <div>Loading Virtual Tutor...</div>
+          </div>
+        </div>
+      )}
     </AuthContext.Provider>
   );
 }
