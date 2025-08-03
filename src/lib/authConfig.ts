@@ -10,7 +10,7 @@ export const AUTH_CONFIG = {
     window.location.hostname !== '127.0.0.1',
     
   // Debug mode - shows detailed logs
-  debugMode: true,
+  debugMode: false,
   
   // Storage keys
   STORAGE_KEYS: {

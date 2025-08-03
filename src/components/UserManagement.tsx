@@ -175,24 +175,7 @@ export default function UserManagement({ onBack }: UserManagementProps) {
               >
                 🔄 Refresh
               </button>
-              <button
-                onClick={() => {
-                  // Debug button to show all localStorage data
-                  if (typeof window !== 'undefined') {
-                    console.log('=== DEBUG: All localStorage data ===');
-                    for (let i = 0; i < localStorage.length; i++) {
-                      const key = localStorage.key(i);
-                      if (key) {
-                        console.log(`${key}:`, localStorage.getItem(key));
-                      }
-                    }
-                    console.log('=== END DEBUG ===');
-                  }
-                }}
-                className="bg-gray-500 text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors text-sm"
-              >
-                🐛 Debug
-              </button>
+
             </div>
           </div>
         </div>
