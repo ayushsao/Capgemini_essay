@@ -11,8 +11,8 @@ interface LoginFormProps {
 export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
   const [formData, setFormData] = useState({
     name: '',
-    email: isLogin ? 'ayushsao32@gmail.com' : '',
-    password: isLogin ? 'password' : '',
+    email: '',
+    password: '',
     confirmPassword: ''
   });
   const [error, setError] = useState('');
@@ -22,8 +22,8 @@ export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
   useEffect(() => {
     setFormData({
       name: '',
-      email: isLogin ? 'ayushsao32@gmail.com' : '',
-      password: isLogin ? 'password' : '',
+      email: '',
+      password: '',
       confirmPassword: ''
     });
     setError(''); // Clear any errors when switching modes
@@ -61,8 +61,8 @@ export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
         // Clear form on successful login/register
         setFormData({
           name: '',
-          email: isLogin ? 'ayushsao32@gmail.com' : '',
-          password: isLogin ? 'password' : '',
+          email: '',
+          password: '',
           confirmPassword: ''
         });
       }
