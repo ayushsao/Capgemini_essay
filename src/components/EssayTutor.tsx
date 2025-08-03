@@ -170,11 +170,11 @@ export default function EssayTutor() {
             {/* Score Highlight */}
             <div className="bg-gradient-to-r from-green-500 to-blue-600 rounded-lg p-4 sm:p-6 text-white text-center">
               <h3 className="text-lg sm:text-2xl font-bold mb-2">🎉 Your Essay Score</h3>
-              <div className="text-2xl sm:text-4xl font-bold mb-2">{analysis.overallScore}/50</div>
+              <div className="text-2xl sm:text-4xl font-bold mb-2">{analysis.totalMarks}/{analysis.maxTotalMarks}</div>
               <div className="text-sm sm:text-lg opacity-90">
-                {analysis.overallScore >= 40 ? 'Excellent!' : 
-                 analysis.overallScore >= 30 ? 'Good Work!' : 
-                 analysis.overallScore >= 20 ? 'Keep Improving!' : 
+                {analysis.totalMarks >= 40 ? 'Excellent!' : 
+                 analysis.totalMarks >= 30 ? 'Good Work!' : 
+                 analysis.totalMarks >= 20 ? 'Keep Improving!' : 
                  'Practice More!'}
               </div>
             </div>

@@ -10,7 +10,7 @@ interface EssayResultsProps {
 
 const COLORS = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6'];
 
-export default function EssayResults({ analysis, isSubmitted = false }: EssayResultsProps) {
+export default function EssayResults({ analysis }: EssayResultsProps) {
   const {
     wordCount,
     spellingAccuracy,
@@ -69,7 +69,7 @@ export default function EssayResults({ analysis, isSubmitted = false }: EssayRes
       <div className="bg-white rounded-lg border shadow-sm p-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Evaluation Breakdown</h3>
         <div className="space-y-4">
-          {chartData.map((item, index) => (
+          {chartData.map((item) => (
             <div key={item.name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <div className="flex items-center">
                 <span className="text-xl mr-3">{getScoreIcon(item.score, item.maxScore)}</span>
@@ -143,7 +143,7 @@ export default function EssayResults({ analysis, isSubmitted = false }: EssayRes
                 <div className="flex items-start">
                   <span className="text-red-600 mr-2">⚠️</span>
                   <div>
-                    <p className="font-medium text-red-800">"{error.text}"</p>
+                    <p className="font-medium text-red-800">&ldquo;{error.text}&rdquo;</p>
                     <p className="text-sm text-red-600 mt-1">{error.suggestions[0]}</p>
                   </div>
                 </div>

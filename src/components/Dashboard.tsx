@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserEssays, getUserStats } from '@/lib/essayStorage';
-import { EssayHistory, UserProgress } from '@/types/user';
+import { EssayHistory } from '@/types/user';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 interface DashboardProps {
@@ -285,7 +285,7 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => setActiveTab(tab.id as 'overview' | 'essays' | 'progress' | 'profile')}
                 className={`py-2 px-3 sm:px-4 border-b-2 font-medium text-sm whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'border-blue-500 text-blue-600'

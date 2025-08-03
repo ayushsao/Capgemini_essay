@@ -450,7 +450,7 @@ function generateImprovementAreas(
   // Grammar Improvement
   if (grammarResults.score < 7) {
     const priority = grammarResults.score < 3 ? 'high' : grammarResults.score < 5 ? 'medium' : 'low';
-    let specificTips: string[] = [
+    const specificTips: string[] = [
       'Review basic sentence structure rules',
       'Practice identifying subjects and verbs in sentences',
       'Learn the difference between active and passive voice',
