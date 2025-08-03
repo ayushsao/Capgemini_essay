@@ -66,7 +66,7 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
             <p className="text-blue-100 mb-3 sm:mb-4 text-sm sm:text-base">Ready to improve your writing skills today?</p>
             <button
               onClick={onNavigateToEssayWriter}
-              className="bg-white text-blue-600 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium hover:bg-blue-50 transition duration-200 transform hover:scale-105 text-sm sm:text-base touch-manipulation"
+              className="bg-white text-blue-600 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium hover:bg-blue-50 transition-all duration-200 transform hover:scale-105 active:scale-95 text-sm sm:text-base touch-manipulation shadow-lg hover:shadow-xl border-2 border-transparent hover:border-blue-200 cursor-pointer"
             >
               ✍️ Start Writing
             </button>
@@ -81,31 +81,31 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-        <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-6 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all duration-200 transform hover:scale-105 cursor-pointer">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs sm:text-sm font-medium text-gray-600">Total Essays</p>
               <p className="text-xl sm:text-3xl font-bold text-gray-900">{userStats.totalEssays}</p>
             </div>
-            <div className="p-2 sm:p-3 bg-blue-100 rounded-full">
+            <div className="p-2 sm:p-3 bg-blue-100 rounded-full transition-colors duration-200 hover:bg-blue-200">
               <span className="text-lg sm:text-2xl">📝</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-6 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-green-200 transition-all duration-200 transform hover:scale-105 cursor-pointer">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs sm:text-sm font-medium text-gray-600">Average Score</p>
               <p className="text-xl sm:text-3xl font-bold text-gray-900">{userStats.averageScore}</p>
             </div>
-            <div className="p-2 sm:p-3 bg-green-100 rounded-full">
+            <div className="p-2 sm:p-3 bg-green-100 rounded-full transition-colors duration-200 hover:bg-green-200">
               <span className="text-lg sm:text-2xl">📊</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-6 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-green-200 transition-all duration-200 transform hover:scale-105 cursor-pointer">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs sm:text-sm font-medium text-gray-600">Improvement</p>
@@ -113,19 +113,19 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
                 {userStats.improvementRate > 0 ? '+' : ''}{userStats.improvementRate}%
               </p>
             </div>
-            <div className="p-2 sm:p-3 bg-green-100 rounded-full">
+            <div className="p-2 sm:p-3 bg-green-100 rounded-full transition-colors duration-200 hover:bg-green-200">
               <span className="text-lg sm:text-2xl">📈</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-6 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-200 transition-all duration-200 transform hover:scale-105 cursor-pointer">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs sm:text-sm font-medium text-gray-600">Subscription</p>
               <p className="text-sm sm:text-lg font-bold text-purple-600 capitalize">{user?.subscription || 'Free'}</p>
             </div>
-            <div className="p-2 sm:p-3 bg-purple-100 rounded-full">
+            <div className="p-2 sm:p-3 bg-purple-100 rounded-full transition-colors duration-200 hover:bg-purple-200">
               <span className="text-lg sm:text-2xl">👑</span>
             </div>
           </div>
@@ -155,16 +155,22 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
 
       {/* Message for new users */}
       {userStats.totalEssays === 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg sm:rounded-xl p-4 sm:p-8 text-center">
-          <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">📝</div>
-          <h3 className="text-lg sm:text-xl font-semibold text-blue-800 mb-2">Ready to start your writing journey?</h3>
-          <p className="text-blue-600 mb-3 sm:mb-4 text-sm sm:text-base">Write your first essay to see detailed analytics and track your progress!</p>
-          <button
-            onClick={onNavigateToEssayWriter}
-            className="bg-blue-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium hover:bg-blue-700 transition duration-200 text-sm sm:text-base touch-manipulation"
-          >
-            Write Your First Essay
-          </button>
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg sm:rounded-xl p-4 sm:p-8 text-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-100 to-indigo-100 opacity-50"></div>
+          <div className="relative z-10">
+            <div className="text-4xl sm:text-6xl mb-3 sm:mb-4 animate-bounce">📝</div>
+            <h3 className="text-lg sm:text-xl font-bold text-blue-800 mb-2">Ready to start your writing journey?</h3>
+            <p className="text-blue-700 mb-4 sm:mb-6 text-sm sm:text-base max-w-md mx-auto">Write your first essay to unlock detailed analytics, track your progress, and improve your writing skills!</p>
+            <div className="space-y-3">
+              <button
+                onClick={onNavigateToEssayWriter}
+                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-110 active:scale-95 text-sm sm:text-base touch-manipulation shadow-xl hover:shadow-2xl border-2 border-transparent hover:border-blue-300 cursor-pointer animate-pulse hover:animate-none"
+              >
+                🚀 Write Your First Essay
+              </button>
+              <p className="text-xs sm:text-sm text-blue-600 font-medium">Click to get started - it&apos;s free!</p>
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -176,7 +182,7 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Your Essays</h2>
         <button
           onClick={onNavigateToEssayWriter}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200 text-sm sm:text-base touch-manipulation w-full sm:w-auto"
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 active:scale-95 text-sm sm:text-base touch-manipulation w-full sm:w-auto shadow-lg hover:shadow-xl border-2 border-transparent hover:border-blue-400 cursor-pointer"
         >
           ✍️ Write New Essay
         </button>
@@ -288,11 +294,11 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as 'overview' | 'essays' | 'progress' | 'profile')}
-                className={`py-2 px-3 sm:px-4 border-b-2 font-medium text-sm whitespace-nowrap ${
+                className={`py-2 px-3 sm:px-4 border-b-2 font-medium text-sm whitespace-nowrap transition-all duration-200 flex-shrink-0 transform hover:scale-105 active:scale-95 cursor-pointer ${
                   activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } transition duration-200 flex-shrink-0`}
+                    ? 'border-blue-500 text-blue-600 bg-blue-50 rounded-t-lg'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50 rounded-t-lg'
+                }`}
               >
                 <span className="mr-1 sm:mr-2">{tab.icon}</span>
                 {tab.name}
@@ -330,7 +336,7 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
             <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">Write at least 2 essays to see your progress tracking!</p>
             <button
               onClick={onNavigateToEssayWriter}
-              className="bg-blue-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium hover:bg-blue-700 transition duration-200 text-sm sm:text-base touch-manipulation"
+              className="bg-blue-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 active:scale-95 text-sm sm:text-base touch-manipulation shadow-lg hover:shadow-xl border-2 border-transparent hover:border-blue-400 cursor-pointer"
             >
               Start Writing Essays
             </button>
