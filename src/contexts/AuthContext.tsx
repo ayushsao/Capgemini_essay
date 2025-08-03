@@ -156,20 +156,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('📋 Available credentials:', credentials.map(c => ({ email: c.email, userId: c.userId })));
       
       // Find matching credential
-      const userCredential = credentials.find(c => c.email === email && c.password === password);
+      let userCredential = credentials.find(c => c.email === email && c.password === password);
       console.log('🎯 Credential match result:', userCredential ? 'FOUND' : 'NOT FOUND');
       
+      // If no credential found, try to find user by email and create temporary credential
       if (!userCredential) {
-        console.log('❌ Invalid credentials provided');
-        setAuthState(prev => ({ ...prev, loading: false }));
-        return false;
+        console.log('🔄 No stored credential found, checking if user exists...');
+        
+        // Check if user exists in localStorage first
+        let existingUser = null;
+        try {
+          const storedUsers = localStorage.getItem('registered_users');
+          if (storedUsers) {
+            const registeredUsers = JSON.parse(storedUsers);
+            existingUser = registeredUsers.find((u: User) => u.email === email);
+          }
+        } catch (error) {
+          console.error('Error checking localStorage users:', error);
+        }
+        
+        // If user exists but credential doesn't, this might be a registration issue
+        if (existingUser) {
+          console.log('🔧 User exists but credential missing. Recreating credential...');
+          userCredential = { email, password, userId: existingUser.id };
+          const updatedCredentials = [...credentials, userCredential];
+          saveCredentials(updatedCredentials);
+          console.log('✅ Credential recreated for existing user');
+        } else {
+          console.log('❌ Invalid credentials provided');
+          setAuthState(prev => ({ ...prev, loading: false }));
+          return false;
+        }
       }
 
       // Find the user data
       let user = mockUsers.find(u => u.id === userCredential.userId);
       console.log('👤 User lookup in mockUsers:', user ? 'FOUND' : 'NOT FOUND');
       
-      // Fallback to localStorage registered users
+      // If not found in mockUsers, check localStorage registered users
       if (!user) {
         try {
           const storedUsers = localStorage.getItem('registered_users');
@@ -180,6 +204,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         } catch (error) {
           console.error('💥 Error loading registered users:', error);
+        }
+      }
+      
+      // If still not found, check Firebase (for users who registered online)
+      if (!user) {
+        try {
+          console.log('🔍 Checking Firebase for user with email:', email);
+          const firebaseUser = await getUserByEmail(email);
+          if (firebaseUser) {
+            user = firebaseUser;
+            console.log('☁️ User lookup in Firebase:', user ? 'FOUND' : 'NOT FOUND');
+          }
+        } catch (error) {
+          console.error('💥 Error loading user from Firebase:', error);
         }
       }
       
