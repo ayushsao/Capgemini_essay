@@ -37,7 +37,7 @@ export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
       if (isLogin) {
         success = await login(formData.email, formData.password);
         if (!success) {
-          setError('Invalid email or password. Try: john@example.com / password');
+          setError('Invalid email or password. Try: ayushsao32@gmail.com / password');
         }
       } else {
         success = await register(formData.name, formData.email, formData.password);

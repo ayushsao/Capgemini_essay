@@ -113,16 +113,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string): Promise<boolean> => {
     setAuthState(prev => ({ ...prev, loading: true }));
     
+    console.log('🔍 Login attempt:', { email, password });
+    
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     // Check stored credentials
     const credentials = getStoredCredentials();
+    console.log('📋 Available credentials:', credentials);
     const userCredential = credentials.find(c => c.email === email && c.password === password);
+    console.log('🎯 Found matching credential:', userCredential);
     
     if (userCredential) {
       // Find the user data (either in mockUsers or check localStorage for registered users)
       let user = mockUsers.find(u => u.id === userCredential.userId);
+      console.log('👤 Found user in mockUsers:', user);
       
       // If not in mockUsers, try to find in localStorage (for registered users)
       if (!user) {
@@ -131,6 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (storedUsers) {
             const registeredUsers = JSON.parse(storedUsers);
             user = registeredUsers.find((u: User) => u.id === userCredential.userId);
+            console.log('💾 Found user in localStorage:', user);
           }
         } catch (error) {
           console.error('Error loading registered users:', error);
