@@ -2,6 +2,7 @@ import { EssayAnalysis, GrammarError, ImprovementArea } from '@/types/essay';
 
 // Common misspellings and their corrections - expanded list
 const commonMisspellings: Record<string, string> = {
+  // Basic misspellings
   'teh': 'the',
   'recieve': 'receive',
   'occured': 'occurred',
@@ -37,39 +38,118 @@ const commonMisspellings: Record<string, string> = {
   'supercede': 'supersede',
   'tommorow': 'tomorrow',
   'untill': 'until',
-  'wierd': 'weird'
+  'wierd': 'weird',
+  
+  // Additional common errors
+  'acheive': 'achieve',
+  'adress': 'address',
+  'arguement': 'argument',
+  'buisness': 'business',
+  'catagory': 'category',
+  'commitee': 'committee',
+  'completly': 'completely',
+  'conscince': 'conscience',
+  'desicion': 'decision',
+  'difinition': 'definition',
+  'explaination': 'explanation',
+  'familar': 'familiar',
+  'hieght': 'height',
+  'immediatly': 'immediately',
+  'judgement': 'judgment',
+  'lenght': 'length',
+  'mispelling': 'misspelling',
+  'neccessary': 'necessary',
+  'occurance': 'occurrence',
+  'posession': 'possession',
+  'refering': 'referring',
+  'sucessful': 'successful',
+  'temperture': 'temperature',
+  'unfortunatly': 'unfortunately',
+  'vaccum': 'vacuum',
+  'wether': 'whether',
+  
+  // Common word confusions
+  'loose': 'lose', // when meant as verb
+  'there': 'their', // contextual
+  'affect': 'effect', // contextual
+  'then': 'than', // contextual
+  'alot': 'a lot',
+  'cannot': 'can not', // sometimes
+  'everytime': 'every time',
+  'inspite': 'in spite',
+  'infront': 'in front',
+  'alright': 'all right',
+  
+  // Professional/academic terms
+  'analize': 'analyze',
+  'caracteristic': 'characteristic',
+  'experiance': 'experience',
+  'independance': 'independence',
+  'responsability': 'responsibility',
+  'sucessfull': 'successful',
+  'technic': 'technique',
+  'therfor': 'therefore',
+  'usefull': 'useful',
+  'wonderfull': 'wonderful'
 };
 
-// Grammar patterns to check - expanded and more comprehensive
+// Grammar patterns to check - comprehensive grammar checking
 const grammarPatterns = [
+  // Articles (a/an)
   {
-    pattern: /\b(a)\s+(apple|orange|umbrella|hour|honest|honor)\b/gi,
+    pattern: /\b(a)\s+(apple|orange|umbrella|hour|honest|honor|ant|elephant|idea|egg|ice|ocean|uncle|example|answer|exercise|office|hour|honor)\b/gi,
     suggestion: 'Use "an" before words starting with vowel sounds'
   },
   {
-    pattern: /\b(an)\s+(book|car|house|dog|university|European)\b/gi,
+    pattern: /\b(an)\s+(book|car|house|dog|university|European|one|user|unique|uniform|unit|usual)\b/gi,
     suggestion: 'Use "a" before words starting with consonant sounds'
   },
+  
+  // Its vs It's
   {
-    pattern: /\bits\s+(going|coming|running|working)\b/gi,
+    pattern: /\bits\s+(going|coming|running|working|time|important|difficult|easy|been|a)\b/gi,
     suggestion: 'Use "it\'s" (it is) instead of "its" (possessive)'
   },
   {
-    pattern: /\byour\s+(going|coming|running|working|welcome)\b/gi,
+    pattern: /\bit\'s\s+(own|color|size|place|way|purpose|function|meaning)\b/gi,
+    suggestion: 'Use "its" (possessive) instead of "it\'s" (it is)'
+  },
+  
+  // Your vs You're
+  {
+    pattern: /\byour\s+(going|coming|running|working|welcome|not|very|so|really|quite|always|never|still)\b/gi,
     suggestion: 'Use "you\'re" (you are) instead of "your" (possessive)'
   },
   {
-    pattern: /\bthere\s+(going|coming|running|working)\b/gi,
+    pattern: /\byou\'re\s+(name|book|house|car|friend|family|job|work|skills|experience)\b/gi,
+    suggestion: 'Use "your" (possessive) instead of "you\'re" (you are)'
+  },
+  
+  // There vs They're vs Their
+  {
+    pattern: /\bthere\s+(going|coming|running|working|not|very|so|really|quite|always|never|still)\b/gi,
     suggestion: 'Use "they\'re" (they are) instead of "there" (location)'
   },
   {
-    pattern: /\bto\s+(busy|tired|excited|happy)\b/gi,
+    pattern: /\bthey\'re\s+(house|car|book|name|family|friends|work|job|skills|way|place)\b/gi,
+    suggestion: 'Use "their" (possessive) instead of "they\'re" (they are)'
+  },
+  {
+    pattern: /\btheir\s+(going|coming|running|working|not|very|so|really|quite|always|never|still)\b/gi,
+    suggestion: 'Use "they\'re" (they are) instead of "their" (possessive)'
+  },
+  
+  // To vs Too vs Two
+  {
+    pattern: /\bto\s+(busy|tired|excited|happy|much|many|late|early|fast|slow|good|bad|big|small|difficult|easy)\b/gi,
     suggestion: 'Use "too" (excessively) instead of "to" (direction/infinitive)'
   },
   {
-    pattern: /\baffect\b(?=.*\b(the|a|an)\s+\w+)/gi,
-    suggestion: 'Consider "effect" (noun) instead of "affect" (verb) in this context'
+    pattern: /\btoo\s+(go|come|run|work|be|do|have|get|make|take|give|see|know|think|feel|look|find|tell|ask|try|help|start|stop)\b/gi,
+    suggestion: 'Use "to" (infinitive) instead of "too" (excessively)'
   },
+  
+  // Modal verbs with "of"
   {
     pattern: /\bshould\s+of\b/gi,
     suggestion: 'Use "should have" instead of "should of"'
@@ -83,12 +163,86 @@ const grammarPatterns = [
     suggestion: 'Use "would have" instead of "would of"'
   },
   {
+    pattern: /\bmight\s+of\b/gi,
+    suggestion: 'Use "might have" instead of "might of"'
+  },
+  {
+    pattern: /\bmust\s+of\b/gi,
+    suggestion: 'Use "must have" instead of "must of"'
+  },
+  
+  // Common spelling/grammar errors
+  {
     pattern: /\balot\b/gi,
     suggestion: 'Use "a lot" (two words) instead of "alot"'
   },
   {
     pattern: /\bi\s+(?![A-Z])/g,
     suggestion: 'Capitalize "I" when used as a pronoun'
+  },
+  
+  // Subject-verb agreement issues
+  {
+    pattern: /\b(he|she|it)\s+(are|were)\b/gi,
+    suggestion: 'Use "is" or "was" with singular subjects (he/she/it)'
+  },
+  {
+    pattern: /\b(they|we|you)\s+(is|was)\b/gi,
+    suggestion: 'Use "are" or "were" with plural subjects (they/we/you)'
+  },
+  {
+    pattern: /\bthere\s+(is|was)\s+\w*\s*(books|cars|people|things|students|problems|questions|answers|ideas|ways|times)\b/gi,
+    suggestion: 'Use "there are" or "there were" with plural nouns'
+  },
+  {
+    pattern: /\bthere\s+(are|were)\s+\w*\s*(book|car|person|thing|student|problem|question|answer|idea|way|time)\b/gi,
+    suggestion: 'Use "there is" or "there was" with singular nouns'
+  },
+  
+  // Sentence structure issues
+  {
+    pattern: /\.\s*[a-z]/g,
+    suggestion: 'Capitalize the first letter after a period'
+  },
+  {
+    pattern: /\b(because|although|since|while|if|when|before|after)\s+[^.!?]*\./gi,
+    suggestion: 'This sentence seems incomplete - dependent clauses need an independent clause'
+  },
+  
+  // Common word confusions
+  {
+    pattern: /\bthen\s+(i|we|you|they|he|she|it)\s+(am|are|is|was|were|will|would|can|could|should|might)\b/gi,
+    suggestion: 'Use "than" for comparisons instead of "then" (time sequence)'
+  },
+  {
+    pattern: /\baffect\b.*\b(the|a|an)\s+\w+/gi,
+    suggestion: 'Consider "effect" (noun) instead of "affect" (verb) when used with articles'
+  },
+  {
+    pattern: /\blose\s+(weight|game|match|job|money|time|way|focus|control|patience|temper|hope)\b/gi,
+    suggestion: 'Use "lose" (verb) - this usage is correct'
+  },
+  {
+    pattern: /\bloose\s+(weight|game|match|job|money|time|way|focus|control|patience|temper|hope)\b/gi,
+    suggestion: 'Use "lose" (verb) instead of "loose" (adjective meaning not tight)'
+  },
+  
+  // Run-on sentences (very basic detection)
+  {
+    pattern: /\b(and|but|so|or)\s+(and|but|so|or)/gi,
+    suggestion: 'Consider breaking this into separate sentences to avoid run-on sentences'
+  },
+  
+  // Missing articles
+  {
+    pattern: /\b(go to|went to|at|in|on)\s+(school|work|store|hospital|bank|library|university|college|office|home)\b/gi,
+    suggestion: 'Consider adding an article (a/an/the) before the noun'
+  },
+  
+  // Apostrophe issues
+  {
+    pattern: /\b(\w+)s'\s+(\w+)/g,
+    suggestion: 'Check apostrophe placement for possessive nouns'
   }
 ];
 
@@ -231,10 +385,27 @@ function analyzeSpelling(words: string[]): { score: number; maxScore: number } {
   
   if (totalValidWords === 0) return { score: 0, maxScore };
   
+  // Calculate accuracy rate
   const accuracyRate = Math.max(0, (totalValidWords - misspelledCount) / totalValidWords);
   
-  // Give base points for effort, then scale with accuracy
-  let score = Math.round(accuracyRate * maxScore);
+  // More strict scoring - penalize mistakes more heavily
+  let score = 0;
+  
+  if (misspelledCount === 0) {
+    score = maxScore; // Perfect spelling gets full points
+  } else {
+    // Deduct points for each misspelling
+    const errorRate = misspelledCount / totalValidWords;
+    
+    if (errorRate >= 0.3) score = 1; // 30%+ errors = very poor
+    else if (errorRate >= 0.2) score = 3; // 20-29% errors = poor
+    else if (errorRate >= 0.15) score = 4; // 15-19% errors = below average
+    else if (errorRate >= 0.1) score = 5; // 10-14% errors = fair
+    else if (errorRate >= 0.08) score = 6; // 8-9% errors = good
+    else if (errorRate >= 0.05) score = 7; // 5-7% errors = very good
+    else if (errorRate >= 0.03) score = 8; // 3-4% errors = excellent
+    else score = 9; // 1-2% errors = nearly perfect
+  }
   
   // Adjust score based on content length
   if (words.length < 15) {
@@ -246,7 +417,7 @@ function analyzeSpelling(words: string[]): { score: number; maxScore: number } {
   }
   
   // Bonus for longer essays with good spelling
-  if (words.length >= 100 && accuracyRate > 0.95) {
+  if (words.length >= 100 && accuracyRate >= 0.98) {
     score = Math.min(maxScore, score + 1);
   }
   
@@ -263,6 +434,7 @@ function analyzeGrammar(text: string): { score: number; maxScore: number; errors
     return { score: 0, maxScore, errors }; // No score for insufficient content
   }
   
+  // Check against all grammar patterns
   grammarPatterns.forEach(pattern => {
     const matches = text.matchAll(pattern.pattern);
     for (const match of matches) {
@@ -276,40 +448,83 @@ function analyzeGrammar(text: string): { score: number; maxScore: number; errors
     }
   });
   
-  // Check for basic sentence structure
-  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 5);
+  // Additional grammar checks
+  
+  // Check for missing capitalization at sentence beginnings
+  const sentences = text.split(/[.!?]+/);
+  for (let i = 0; i < sentences.length - 1; i++) {
+    const nextSentence = sentences[i + 1].trim();
+    if (nextSentence.length > 0 && /^[a-z]/.test(nextSentence)) {
+      errors.push({
+        text: nextSentence.substring(0, 10) + "...",
+        position: 0,
+        suggestions: ["Capitalize the first letter of each sentence"]
+      });
+    }
+  }
+  
+  // Check for run-on sentences (very long sentences without proper punctuation)
+  const longSentences = text.split(/[.!?]+/).filter(s => s.trim().split(/\s+/).length > 25);
+  longSentences.forEach(sentence => {
+    if (sentence.trim().length > 0) {
+      errors.push({
+        text: sentence.substring(0, 30) + "...",
+        position: 0,
+        suggestions: ["Consider breaking this long sentence into smaller ones"]
+      });
+    }
+  });
+  
+  // Check for repeated words
+  const wordArray = text.toLowerCase().split(/\s+/);
+  for (let i = 0; i < wordArray.length - 1; i++) {
+    if (wordArray[i] === wordArray[i + 1] && wordArray[i].length > 2) {
+      errors.push({
+        text: wordArray[i] + " " + wordArray[i + 1],
+        position: 0,
+        suggestions: ["Remove repeated word: " + wordArray[i]]
+      });
+    }
+  }
+  
+  // Check for basic sentence structure issues
   const sentenceCount = Math.max(1, sentences.length);
   
-  // Calculate error density
-  const errorRate = errors.length / Math.max(sentenceCount, 1);
+  // Calculate error density - more sensitive to errors
+  const wordCount = words.length;
+  const errorRate = errors.length / Math.max(wordCount / 10, 1); // Errors per 10 words
   
-  // Base score calculation
+  // Base score calculation - start from 10 and deduct points
   let score = maxScore;
+  
+  // Deduct points for each error found
+  const errorPenalty = Math.min(8, errors.length * 1.5); // 1.5 points per error, max 8 points deduction
+  score -= errorPenalty;
+  
+  // Additional penalties based on error density
+  if (errorRate > 2) score -= 2; // Very high error rate
+  else if (errorRate > 1.5) score -= 1.5; // High error rate
+  else if (errorRate > 1) score -= 1; // Medium error rate
+  else if (errorRate > 0.5) score -= 0.5; // Low error rate
   
   // Content length adjustments
   if (words.length < 15) {
-    score = Math.min(score, 2); // Very low cap for minimal content
+    score = Math.min(score, 3); // Very low cap for minimal content
   } else if (words.length < 30) {
-    score = Math.min(score, 4); // Low cap for short content
+    score = Math.min(score, 5); // Low cap for short content
   } else if (words.length < 50) {
-    score = Math.min(score, 6); // Medium cap for developing content
-  } else if (words.length < 100) {
-    score = Math.min(score, 8); // Good cap for substantial content
+    score = Math.min(score, 7); // Medium cap for developing content
   }
   
-  // Error-based penalties
-  if (errorRate > 0.8) score = Math.min(score, 1);
-  else if (errorRate > 0.6) score = Math.min(score, 2);
-  else if (errorRate > 0.4) score = Math.min(score, 3);
-  else if (errorRate > 0.3) score = Math.min(score, 4);
-  else if (errorRate > 0.2) score = Math.min(score, 6);
-  else if (errorRate > 0.1) score = Math.min(score, 7);
-  else if (errorRate > 0.05) score = Math.min(score, 8);
-  
-  // Bonus for longer, error-free essays
-  if (words.length >= 200 && errors.length === 0) {
+  // Bonus for longer, well-written essays
+  if (words.length >= 100 && errors.length === 0) {
     score = Math.min(maxScore, score + 1);
+  } else if (words.length >= 200 && errors.length <= 1) {
+    score = Math.min(maxScore, score + 0.5);
   }
+  
+  // Ensure score is within bounds
+  score = Math.max(0, Math.min(maxScore, Math.round(score * 2) / 2)); // Round to nearest 0.5
   
   return { score, maxScore, errors };
 }
