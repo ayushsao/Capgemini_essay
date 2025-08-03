@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getUserEssays, getUserStats } from '@/lib/essayStorage';
 import { EssayHistory } from '@/types/user';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import EssayResults from './EssayResults';
 
 // Dashboard component for user analytics and essay management
 // Updated for deployment compatibility
@@ -15,6 +16,7 @@ interface DashboardProps {
 export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<'overview' | 'essays' | 'progress' | 'profile'>('overview');
+  const [viewingEssay, setViewingEssay] = useState<EssayHistory | null>(null);
   const [essayHistory, setEssayHistory] = useState<EssayHistory[]>([]);
   const [userStats, setUserStats] = useState({
     totalEssays: 0,
@@ -190,7 +192,11 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
 
       <div className="grid gap-4 sm:gap-6">
         {essayHistory.map((essay) => (
-          <div key={essay.id} className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100 hover:shadow-md transition duration-200">
+          <div 
+            key={essay.id} 
+            onClick={() => setViewingEssay(essay)}
+            className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all duration-200 cursor-pointer transform hover:scale-[1.02] active:scale-[0.98]"
+          >
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 sm:mb-4 gap-2 sm:gap-0">
               <div className="flex-1">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">{essay.title}</h3>
@@ -203,7 +209,7 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
             
             <p className="text-gray-600 mb-3 sm:mb-4 line-clamp-2 text-sm sm:text-base">{essay.content}</p>
             
-            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-4 text-xs sm:text-sm">
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-4 text-xs sm:text-sm mb-4">
               <div className="text-center">
                 <p className="text-gray-500">Word Count</p>
                 <p className="font-semibold">{essay.analysis.wordCount.score}/10</p>
@@ -224,6 +230,19 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
                 <p className="text-gray-500">Delete</p>
                 <p className="font-semibold">{essay.analysis.deleteScore.score}/10</p>
               </div>
+            </div>
+            
+            <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+              <span className="text-xs sm:text-sm text-gray-500">Click to view detailed analysis</span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setViewingEssay(essay);
+                }}
+                className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
+              >
+                📖 View Details
+              </button>
             </div>
           </div>
         ))}
@@ -308,9 +327,52 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
         </div>
 
         {/* Content */}
-        {activeTab === 'overview' && renderOverview()}
-        {activeTab === 'essays' && renderEssays()}
-        {activeTab === 'progress' && userStats.totalEssays > 0 && (
+        {viewingEssay ? (
+          <div className="space-y-4 sm:space-y-6">
+            {/* Back button and header */}
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => setViewingEssay(null)}
+                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors duration-200 font-medium"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                ← Back to Essays
+              </button>
+              <div className={`px-3 py-1 rounded-full text-sm font-medium ${getScoreColor(viewingEssay.analysis.totalMarks, viewingEssay.analysis.maxTotalMarks)}`}>
+                Score: {viewingEssay.analysis.totalMarks}/{viewingEssay.analysis.maxTotalMarks}
+              </div>
+            </div>
+
+            {/* Essay header */}
+            <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{viewingEssay.title}</h1>
+              <p className="text-sm text-gray-500 mb-4">Created: {new Date(viewingEssay.createdAt).toLocaleDateString()}</p>
+              
+              {/* Essay content */}
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <h3 className="font-semibold text-gray-700 mb-3">Essay Content:</h3>
+                <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                  {viewingEssay.content}
+                </div>
+              </div>
+            </div>
+
+            {/* Detailed analysis */}
+            <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Detailed Analysis</h2>
+              <EssayResults analysis={viewingEssay.analysis} />
+            </div>
+          </div>
+        ) : (
+          <>
+            {activeTab === 'overview' && renderOverview()}
+            {activeTab === 'essays' && renderEssays()}
+          </>
+        )}
+        
+        {!viewingEssay && activeTab === 'progress' && userStats.totalEssays > 0 && (
           <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Your Progress</h2>
             <div className="w-full h-64 sm:h-80 lg:h-96">
@@ -329,7 +391,7 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
             </div>
           </div>
         )}
-        {activeTab === 'progress' && userStats.totalEssays === 0 && (
+        {!viewingEssay && activeTab === 'progress' && userStats.totalEssays === 0 && (
           <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100 text-center">
             <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">📈</div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">No Progress Data Yet</h2>
@@ -342,7 +404,7 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
             </button>
           </div>
         )}
-        {activeTab === 'profile' && (
+        {!viewingEssay && activeTab === 'profile' && (
           <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Profile Settings</h2>
             <div className="max-w-md space-y-3 sm:space-y-4">
