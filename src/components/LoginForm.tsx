@@ -18,8 +18,35 @@ export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
   const [error, setError] = useState('');
   const { login, register, loading } = useAuth();
 
+  // Ensure form starts completely empty on mount
+  useEffect(() => {
+    setFormData({
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: ''
+    });
+  }, []);
+
   // Update form data when switching between login and signup modes
   useEffect(() => {
+    // Clear any potential cached values
+    if (typeof window !== 'undefined') {
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        const form = document.querySelector('form');
+        if (form) {
+          form.reset();
+          // Force clear all inputs
+          const inputs = form.querySelectorAll('input');
+          inputs.forEach(input => {
+            input.value = '';
+            input.setAttribute('value', '');
+          });
+        }
+      }, 10);
+    }
+    
     setFormData({
       name: '',
       email: '',
@@ -48,7 +75,7 @@ export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
       if (isLogin) {
         success = await login(formData.email, formData.password);
         if (!success) {
-          setError('Invalid email or password. Try: ayushsao32@gmail.com / password');
+          setError('Invalid email or password. Please check your credentials and try again.');
         }
       } else {
         success = await register(formData.name, formData.email, formData.password);
@@ -98,7 +125,13 @@ export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
         </div>
 
         {/* Form */}
-        <form className="mt-6 sm:mt-8 space-y-4 sm:space-y-6 bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-100" onSubmit={handleSubmit}>
+        <form 
+          key={isLogin ? 'login' : 'signup'} // Force re-render when mode changes
+          className="mt-6 sm:mt-8 space-y-4 sm:space-y-6 bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-100" 
+          onSubmit={handleSubmit}
+          autoComplete="off"
+          noValidate
+        >
           <div className="space-y-4">
             {!isLogin && (
               <div>
@@ -109,6 +142,10 @@ export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
                   id="name"
                   name="name"
                   type="text"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="words"
+                  spellCheck="false"
                   required={!isLogin}
                   value={formData.name}
                   onChange={handleInputChange}
@@ -126,7 +163,10 @@ export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
                 id="email"
                 name="email"
                 type="email"
-                autoComplete="email"
+                autoComplete="new-password"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck="false"
                 required
                 value={formData.email}
                 onChange={handleInputChange}
@@ -143,7 +183,10 @@ export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
                 id="password"
                 name="password"
                 type="password"
-                autoComplete={isLogin ? "current-password" : "new-password"}
+                autoComplete="new-password"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck="false"
                 required
                 value={formData.password}
                 onChange={handleInputChange}
@@ -162,6 +205,9 @@ export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
                   name="confirmPassword"
                   type="password"
                   autoComplete="new-password"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
                   required={!isLogin}
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
