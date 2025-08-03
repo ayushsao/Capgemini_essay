@@ -1,4 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Capgemini Essay Writing Tutor
+
+A comprehensive essay analysis and writing improvement platform built with Next.js, TypeScript, and Tailwind CSS.
+
+## Features
+
+### 🔐 Authentication System
+- **Attractive Login/Register Interface** with modern design
+- **User Profile Management** with avatar and subscription tracking
+- **Session Management** with local storage persistence
+- **Demo Credentials**: john@example.com / password
+
+### 📊 Personal Dashboard
+- **Overview Section** with welcome message and quick stats
+- **Progress Tracking** with interactive charts and weekly analytics
+- **Essay History** with detailed scoring breakdown
+- **Strengths & Improvement Areas** analysis
+- **Subscription Management** (Free/Premium tiers)
+
+### ✍️ Essay Analysis Engine
+- **Real-time Analysis** with 1-second debouncing
+- **Multi-criteria Scoring**:
+  - Word Count Evaluation (optimal 200-500 words)
+  - Spelling Accuracy Assessment
+  - Grammar Evaluation with error detection
+  - Backspace & Delete Score tracking
+  - Total scoring out of 50 points
+
+### 📈 Visual Analytics
+- **Interactive Charts** using Recharts library
+- **Progress Visualization** with area and line charts
+- **Score Distribution** with bar charts and pie charts
+- **Performance Metrics** tracking improvement over time
+
+### 🎨 Modern UI/UX
+- **Professional Capgemini Branding** with blue color scheme
+- **Responsive Design** optimized for all devices
+- **Smooth Animations** and hover effects
+- **Intuitive Navigation** with tab-based interface
+- **Loading States** and error handling
 
 ## Getting Started
 
@@ -14,20 +53,101 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Demo Usage
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Login** with demo credentials:
+   - Email: `john@example.com`
+   - Password: `password`
+
+2. **Explore Dashboard** features:
+   - View your writing statistics
+   - Check progress charts
+   - Review essay history
+
+3. **Write Essays**:
+   - Click "Start Writing" to access the essay editor
+   - Type your essay and see real-time analysis
+   - Get detailed feedback and scoring
+
+## Technology Stack
+
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Charts**: Recharts
+- **NLP**: Natural language processing for text analysis
+- **State Management**: React Context API
+- **Storage**: LocalStorage for demo purposes
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js app router
+├── components/             # React components
+│   ├── App.tsx            # Main application component
+│   ├── Dashboard.tsx      # Personal dashboard
+│   ├── LoginForm.tsx      # Authentication forms
+│   ├── EssayTutor.tsx     # Main essay interface
+│   ├── EssayEditor.tsx    # Essay writing component
+│   └── EssayResults.tsx   # Results and scoring display
+├── contexts/              # React contexts
+│   └── AuthContext.tsx    # Authentication state management
+├── lib/                   # Utility functions
+│   └── essayAnalysis.ts   # Essay analysis engine
+└── types/                 # TypeScript type definitions
+    ├── essay.ts           # Essay-related types
+    └── user.ts            # User and authentication types
+```
+
+## Analysis Features
+
+### Word Count Scoring
+- **0-50 words**: 0-3 points (needs expansion)
+- **50-100 words**: 3-5 points (developing)
+- **100-200 words**: 5-8 points (good length)
+- **200-500 words**: 8-10 points (optimal)
+- **500+ words**: Penalty for excessive length
+
+### Grammar & Spelling
+- **Common misspelling detection** with suggestions
+- **Grammar pattern matching** for frequent errors
+- **Article usage validation** (a/an/the)
+- **Pronoun confusion detection** (your/you're, its/it's)
+
+### Performance Metrics
+- **Typing behavior analysis** (backspace/delete patterns)
+- **Writing efficiency scoring**
+- **Improvement tracking** over time
+- **Personalized recommendations**
+
+## Customization
+
+The application is designed to be easily customizable:
+
+- **Branding**: Update colors and logos in Tailwind config
+- **Analysis Rules**: Modify scoring algorithms in `essayAnalysis.ts`
+- **UI Components**: Extend components with additional features
+- **Authentication**: Replace mock auth with real backend integration
+
+## Future Enhancements
+
+- **Real-time Collaboration** for peer review
+- **Advanced NLP** with AI-powered suggestions
+- **Export Functionality** for essays and reports
+- **Integration** with learning management systems
+- **Mobile App** with React Native
 
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+To learn more about the technologies used:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/) - TypeScript language reference
+- [Tailwind CSS](https://tailwindcss.com/docs) - utility-first CSS framework
+- [Recharts](https://recharts.org/en-US/) - composable charting library
 
 ## Deploy on Vercel
 
