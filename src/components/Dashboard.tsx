@@ -6,6 +6,7 @@ import { getUserEssays, getUserStats } from '@/lib/essayStorage';
 import { EssayHistory } from '@/types/user';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import EssayResults from './EssayResults';
+import TransitionLoader from './TransitionLoader';
 
 // Dashboard component for user analytics and essay management
 // Updated for deployment compatibility
@@ -18,6 +19,7 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'essays' | 'progress' | 'profile'>('overview');
   const [viewingEssay, setViewingEssay] = useState<EssayHistory | null>(null);
   const [essayHistory, setEssayHistory] = useState<EssayHistory[]>([]);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const [userStats, setUserStats] = useState({
     totalEssays: 0,
     averageScore: 0,
@@ -56,6 +58,39 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
     if (percentage >= 80) return 'text-green-600 bg-green-100';
     if (percentage >= 60) return 'text-yellow-600 bg-yellow-100';
     return 'text-red-600 bg-red-100';
+  };
+
+  // Handle tab switching with transition
+  const handleTabChange = async (newTab: 'overview' | 'essays' | 'progress' | 'profile') => {
+    if (newTab === activeTab) return;
+    
+    setIsTransitioning(true);
+    
+    // Small delay for smooth transition
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    setActiveTab(newTab);
+    setIsTransitioning(false);
+  };
+
+  // Handle essay viewing with transition
+  const handleViewEssay = async (essay: EssayHistory) => {
+    setIsTransitioning(true);
+    
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    setViewingEssay(essay);
+    setIsTransitioning(false);
+  };
+
+  // Handle back to dashboard with transition
+  const handleBackToDashboard = async () => {
+    setIsTransitioning(true);
+    
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    setViewingEssay(null);
+    setIsTransitioning(false);
   };
 
   const renderOverview = () => (
@@ -194,7 +229,7 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
         {essayHistory.map((essay) => (
           <div 
             key={essay.id} 
-            onClick={() => setViewingEssay(essay)}
+            onClick={() => handleViewEssay(essay)}
             className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all duration-200 cursor-pointer transform hover:scale-[1.02] active:scale-[0.98]"
           >
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 sm:mb-4 gap-2 sm:gap-0">
@@ -237,7 +272,7 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setViewingEssay(essay);
+                  handleViewEssay(essay);
                 }}
                 className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
               >
@@ -252,6 +287,9 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Transition Loader */}
+      {isTransitioning && <TransitionLoader message="Loading..." />}
+      
       {/* Header */}
       <header className="bg-white shadow-sm border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
@@ -312,7 +350,7 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as 'overview' | 'essays' | 'progress' | 'profile')}
+                onClick={() => handleTabChange(tab.id as 'overview' | 'essays' | 'progress' | 'profile')}
                 className={`py-2 px-3 sm:px-4 border-b-2 font-medium text-sm whitespace-nowrap transition-all duration-200 flex-shrink-0 transform hover:scale-105 active:scale-95 cursor-pointer ${
                   activeTab === tab.id
                     ? 'border-blue-500 text-blue-600 bg-blue-50 rounded-t-lg'
@@ -332,7 +370,7 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
             {/* Back button and header */}
             <div className="flex items-center justify-between">
               <button
-                onClick={() => setViewingEssay(null)}
+                onClick={() => handleBackToDashboard()}
                 className="flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors duration-200 font-medium"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

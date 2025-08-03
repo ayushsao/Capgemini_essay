@@ -93,23 +93,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     
-    const storedUser = localStorage.getItem('user');
-    
-    if (storedUser) {
-      try {
-        const user = JSON.parse(storedUser);
-        setAuthState({
-          user,
-          isAuthenticated: true,
-          loading: false
-        });
-      } catch (error) {
-        localStorage.removeItem('user');
+    // Add a small delay to show the preloader
+    const timer = setTimeout(() => {
+      const storedUser = localStorage.getItem('user');
+      
+      if (storedUser) {
+        try {
+          const user = JSON.parse(storedUser);
+          setAuthState({
+            user,
+            isAuthenticated: true,
+            loading: false
+          });
+        } catch (error) {
+          localStorage.removeItem('user');
+          setAuthState(prev => ({ ...prev, loading: false }));
+        }
+      } else {
         setAuthState(prev => ({ ...prev, loading: false }));
       }
-    } else {
-      setAuthState(prev => ({ ...prev, loading: false }));
-    }
+    }, 1500); // Show preloader for at least 1.5 seconds
+
+    return () => clearTimeout(timer);
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {

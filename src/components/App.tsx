@@ -1,25 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import LoginForm from './LoginForm';
 import Dashboard from './Dashboard';
 import EssayTutor from './EssayTutor';
+import Preloader from './Preloader';
 
 export default function App() {
   const { isAuthenticated, loading } = useAuth();
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [currentView, setCurrentView] = useState<'dashboard' | 'essay-writer'>('dashboard');
+  const [showPreloader, setShowPreloader] = useState(true);
+  const [appReady, setAppReady] = useState(false);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
+  // Simulate initial app loading
+  useEffect(() => {
+    if (!loading) {
+      setAppReady(true);
+    }
+  }, [loading]);
+
+  // Show preloader on first load or when loading auth state
+  if (showPreloader || loading) {
+    return <Preloader onComplete={() => setShowPreloader(false)} />;
   }
 
   if (!isAuthenticated) {
