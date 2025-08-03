@@ -18,6 +18,24 @@ export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
   const [error, setError] = useState('');
   const { login, register, loading } = useAuth();
 
+  const handleQuickLogin = async () => {
+    console.log('🚀 Quick admin login attempt...');
+    setError('');
+    
+    try {
+      const success = await login('ayushsao32@gmail.com', 'password');
+      if (success) {
+        console.log('✅ Quick login successful');
+      } else {
+        console.log('❌ Quick login failed');
+        setError('Quick login failed - check console for details');
+      }
+    } catch (error) {
+      console.error('💥 Quick login error:', error);
+      setError('Quick login error - check console');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -202,6 +220,20 @@ export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
               )}
             </button>
           </div>
+
+          {/* Quick Admin Login Button - Only show in login mode */}
+          {isLogin && (
+            <div>
+              <button
+                type="button"
+                onClick={handleQuickLogin}
+                disabled={loading}
+                className="w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+              >
+                🚀 Quick Admin Login (Testing)
+              </button>
+            </div>
+          )}
 
           <div className="text-center">
             <button

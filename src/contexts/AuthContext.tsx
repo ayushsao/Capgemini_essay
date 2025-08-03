@@ -41,29 +41,32 @@ interface UserCredentials {
 }
 
 const getStoredCredentials = (): UserCredentials[] => {
-  // Default credentials for both server and client
+  // Default credentials - hardcoded for reliability in production
   const defaultCredentials = [
     { email: 'ayushsao32@gmail.com', password: 'password', userId: '1' },
     { email: 'jane@example.com', password: 'password', userId: '2' }
   ];
 
-  // Return default if on server side
+  // Always return default credentials on server side or if localStorage fails
   if (typeof window === 'undefined') {
+    console.log('🖥️ Server side - returning default credentials');
     return defaultCredentials;
   }
 
   try {
     const stored = localStorage.getItem('user_credentials');
     if (stored) {
-      return JSON.parse(stored);
+      const parsedCredentials = JSON.parse(stored);
+      console.log('💾 Found stored credentials:', parsedCredentials);
+      return parsedCredentials;
     } else {
-      // Initialize with default demo users if nothing is stored
+      console.log('📝 No stored credentials, initializing with defaults');
       localStorage.setItem('user_credentials', JSON.stringify(defaultCredentials));
       return defaultCredentials;
     }
   } catch (error) {
-    // If there's any error, return and save default credentials
-    localStorage.setItem('user_credentials', JSON.stringify(defaultCredentials));
+    console.warn('⚠️ localStorage error, using default credentials:', error);
+    // Don't try to write to localStorage if it's failing
     return defaultCredentials;
   }
 };
@@ -118,59 +121,75 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
+    console.log('� Login started:', { email });
     setAuthState(prev => ({ ...prev, loading: true }));
     
-    console.log('🔍 Login attempt:', { email, password });
-    console.log('🌐 Environment:', typeof window !== 'undefined' ? 'client' : 'server');
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Ensure we're on the client side
-    if (typeof window === 'undefined') {
-      console.log('❌ Login attempted on server side');
-      setAuthState(prev => ({ ...prev, loading: false }));
-      return false;
-    }
-    
-    // Check stored credentials
-    const credentials = getStoredCredentials();
-    console.log('📋 Available credentials:', credentials);
-    const userCredential = credentials.find(c => c.email === email && c.password === password);
-    console.log('🎯 Found matching credential:', userCredential);
-    
-    if (userCredential) {
-      // Find the user data (either in mockUsers or check localStorage for registered users)
-      let user = mockUsers.find(u => u.id === userCredential.userId);
-      console.log('👤 Found user in mockUsers:', user);
+    try {
+      // Ensure we're on the client side
+      if (typeof window === 'undefined') {
+        console.log('❌ Login attempted on server side');
+        setAuthState(prev => ({ ...prev, loading: false }));
+        return false;
+      }
+
+      console.log('🌐 Client side login processing...');
       
-      // If not in mockUsers, try to find in localStorage (for registered users)
+      // Simulate API call with shorter delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Get credentials - this should always work now
+      const credentials = getStoredCredentials();
+      console.log('📋 Available credentials:', credentials.map(c => ({ email: c.email, userId: c.userId })));
+      
+      // Find matching credential
+      const userCredential = credentials.find(c => c.email === email && c.password === password);
+      console.log('🎯 Credential match result:', userCredential ? 'FOUND' : 'NOT FOUND');
+      
+      if (!userCredential) {
+        console.log('❌ Invalid credentials provided');
+        setAuthState(prev => ({ ...prev, loading: false }));
+        return false;
+      }
+
+      // Find the user data
+      let user = mockUsers.find(u => u.id === userCredential.userId);
+      console.log('👤 User lookup in mockUsers:', user ? 'FOUND' : 'NOT FOUND');
+      
+      // Fallback to localStorage registered users
       if (!user) {
         try {
           const storedUsers = localStorage.getItem('registered_users');
           if (storedUsers) {
             const registeredUsers = JSON.parse(storedUsers);
             user = registeredUsers.find((u: User) => u.id === userCredential.userId);
-            console.log('💾 Found user in localStorage:', user);
+            console.log('💾 User lookup in localStorage:', user ? 'FOUND' : 'NOT FOUND');
           }
         } catch (error) {
-          console.error('Error loading registered users:', error);
+          console.error('💥 Error loading registered users:', error);
         }
       }
       
-      if (user) {
-        localStorage.setItem('user', JSON.stringify(user));
-        setAuthState({
-          user,
-          isAuthenticated: true,
-          loading: false
-        });
-        return true;
+      if (!user) {
+        console.log('❌ User data not found');
+        setAuthState(prev => ({ ...prev, loading: false }));
+        return false;
       }
+
+      // Success - store user and update state
+      console.log('✅ Login successful for user:', user.name);
+      localStorage.setItem('user', JSON.stringify(user));
+      setAuthState({
+        user,
+        isAuthenticated: true,
+        loading: false
+      });
+      return true;
+      
+    } catch (error) {
+      console.error('💥 Login error:', error);
+      setAuthState(prev => ({ ...prev, loading: false }));
+      return false;
     }
-    
-    setAuthState(prev => ({ ...prev, loading: false }));
-    return false;
   };
 
   const register = async (name: string, email: string, password: string): Promise<boolean> => {
