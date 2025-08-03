@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, AuthState } from '@/types/user';
 import { createUser, getUserByEmail, getUsers } from '@/lib/firebaseServices';
+import { AUTH_CONFIG, authLog } from '@/lib/authConfig';
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<boolean>;
@@ -41,33 +42,46 @@ interface UserCredentials {
 }
 
 const getStoredCredentials = (): UserCredentials[] => {
-  // Default credentials - hardcoded for reliability in production
-  const defaultCredentials = [
+  // Hardcoded credentials for maximum reliability in production
+  const ADMIN_CREDENTIALS = [
     { email: 'ayushsao32@gmail.com', password: 'password', userId: '1' },
     { email: 'jane@example.com', password: 'password', userId: '2' }
   ];
 
-  // Always return default credentials on server side or if localStorage fails
+  // Always return hardcoded credentials on server side
   if (typeof window === 'undefined') {
-    console.log('🖥️ Server side - returning default credentials');
-    return defaultCredentials;
+    console.log('🖥️ Server side - returning hardcoded admin credentials');
+    return ADMIN_CREDENTIALS;
   }
 
+  // For production/online deployment, always ensure admin credentials exist
+  const isOnline = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+  
   try {
+    let credentials = ADMIN_CREDENTIALS; // Start with admin credentials
+    
     const stored = localStorage.getItem('user_credentials');
     if (stored) {
       const parsedCredentials = JSON.parse(stored);
-      console.log('💾 Found stored credentials:', parsedCredentials);
-      return parsedCredentials;
-    } else {
-      console.log('📝 No stored credentials, initializing with defaults');
-      localStorage.setItem('user_credentials', JSON.stringify(defaultCredentials));
-      return defaultCredentials;
+      console.log('💾 Found stored credentials, merging with admin credentials');
+      
+      // Ensure admin credentials are always present
+      const hasAdmin = parsedCredentials.some((cred: UserCredentials) => cred.email === 'ayushsao32@gmail.com');
+      if (!hasAdmin) {
+        credentials = [...ADMIN_CREDENTIALS, ...parsedCredentials];
+      } else {
+        credentials = parsedCredentials;
+      }
     }
+    
+    // Save merged credentials
+    localStorage.setItem('user_credentials', JSON.stringify(credentials));
+    console.log('✅ Credentials ensured for', isOnline ? 'ONLINE' : 'LOCAL', 'environment');
+    return credentials;
+    
   } catch (error) {
-    console.warn('⚠️ localStorage error, using default credentials:', error);
-    // Don't try to write to localStorage if it's failing
-    return defaultCredentials;
+    console.warn('⚠️ localStorage error, using hardcoded admin credentials:', error);
+    return ADMIN_CREDENTIALS;
   }
 };
 

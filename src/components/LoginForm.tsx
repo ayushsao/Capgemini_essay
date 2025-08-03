@@ -36,6 +36,16 @@ export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
     }
   };
 
+  const fillAdminCredentials = () => {
+    setFormData({
+      name: '',
+      email: 'ayushsao32@gmail.com',
+      password: 'password',
+      confirmPassword: ''
+    });
+    setError('Admin credentials filled! Click Sign In button.');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -223,15 +233,26 @@ export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
 
           {/* Quick Admin Login Button - Only show in login mode */}
           {isLogin && (
-            <div>
+            <div className="space-y-2">
               <button
                 type="button"
                 onClick={handleQuickLogin}
                 disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+                className="w-full flex justify-center py-3 px-4 border-2 border-orange-400 text-sm font-bold rounded-lg text-orange-700 bg-orange-50 hover:bg-orange-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200 shadow-sm"
               >
-                🚀 Quick Admin Login (Testing)
+                🚀 ADMIN LOGIN - Click Here to Test Online Login
               </button>
+              <button
+                type="button"
+                onClick={fillAdminCredentials}
+                disabled={loading}
+                className="w-full flex justify-center py-2 px-4 border border-blue-300 text-xs font-medium rounded-lg text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+              >
+                📝 Fill Admin Credentials (then click Sign In)
+              </button>
+              <p className="text-xs text-center text-gray-500">
+                ↑ Try both buttons if online login fails
+              </p>
             </div>
           )}
 
