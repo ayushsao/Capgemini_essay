@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, AuthState } from '@/types/user';
+import { createUser, getUserByEmail, getUsers } from '@/lib/firebaseServices';
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<boolean>;
@@ -16,8 +17,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const mockUsers: User[] = [
   {
     id: '1',
-    name: 'John Doe',
-    email: 'john@example.com',
+    name: 'Ayush Admin',
+    email: 'ayushsao32@gmail.com',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
     joinDate: '2024-01-15',
     subscription: 'premium'
@@ -40,12 +41,15 @@ interface UserCredentials {
 }
 
 const getStoredCredentials = (): UserCredentials[] => {
-  // Check if we're on the client side
+  // Default credentials for both server and client
+  const defaultCredentials = [
+    { email: 'ayushsao32@gmail.com', password: 'password', userId: '1' },
+    { email: 'jane@example.com', password: 'password', userId: '2' }
+  ];
+
+  // Return default if on server side
   if (typeof window === 'undefined') {
-    return [
-      { email: 'john@example.com', password: 'password', userId: '1' },
-      { email: 'jane@example.com', password: 'password', userId: '2' }
-    ];
+    return defaultCredentials;
   }
 
   try {
@@ -54,19 +58,11 @@ const getStoredCredentials = (): UserCredentials[] => {
       return JSON.parse(stored);
     } else {
       // Initialize with default demo users if nothing is stored
-      const defaultCredentials = [
-        { email: 'john@example.com', password: 'password', userId: '1' },
-        { email: 'jane@example.com', password: 'password', userId: '2' }
-      ];
       localStorage.setItem('user_credentials', JSON.stringify(defaultCredentials));
       return defaultCredentials;
     }
   } catch (error) {
     // If there's any error, return and save default credentials
-    const defaultCredentials = [
-      { email: 'john@example.com', password: 'password', userId: '1' },
-      { email: 'jane@example.com', password: 'password', userId: '2' }
-    ];
     localStorage.setItem('user_credentials', JSON.stringify(defaultCredentials));
     return defaultCredentials;
   }
@@ -84,14 +80,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isAuthenticated: false,
     loading: true
   });
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    // Check for stored auth state
-    // Ensure we're on the client side
-    if (typeof window === 'undefined') {
-      setAuthState(prev => ({ ...prev, loading: false }));
-      return;
-    }
+    // Set client flag to prevent hydration issues
+    setIsClient(true);
     
     // Add a small delay to show the preloader
     const timer = setTimeout(() => {
@@ -132,7 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       let user = mockUsers.find(u => u.id === userCredential.userId);
       
       // If not in mockUsers, try to find in localStorage (for registered users)
-      if (!user && typeof window !== 'undefined') {
+      if (!user) {
         try {
           const storedUsers = localStorage.getItem('registered_users');
           if (storedUsers) {
@@ -145,9 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       if (user) {
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('user', JSON.stringify(user));
-        }
+        localStorage.setItem('user', JSON.stringify(user));
         setAuthState({
           user,
           isAuthenticated: true,
@@ -164,60 +155,102 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = async (name: string, email: string, password: string): Promise<boolean> => {
     setAuthState(prev => ({ ...prev, loading: true }));
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Check if user already exists in mockUsers or credentials
-    const credentials = getStoredCredentials();
-    if (mockUsers.find(u => u.email === email) || credentials.find(c => c.email === email)) {
-      setAuthState(prev => ({ ...prev, loading: false }));
-      return false;
-    }
-    
-    const newUser: User = {
-      id: Date.now().toString(),
-      name,
-      email,
-      joinDate: new Date().toISOString().split('T')[0],
-      subscription: 'free'
-    };
-    
-    // Save user credentials
-    const newCredential: UserCredentials = {
-      email,
-      password,
-      userId: newUser.id
-    };
-    
-    const updatedCredentials = [...credentials, newCredential];
-    saveCredentials(updatedCredentials);
-    
-    // Save user data to registered users storage
-    if (typeof window !== 'undefined') {
+    try {
+      console.log('Starting registration process...', { name, email });
+      
+      // Check if user already exists
+      console.log('Checking if user exists in Firebase...');
+      const existingUser = await getUserByEmail(email);
+      if (existingUser) {
+        console.log('User already exists:', existingUser);
+        setAuthState(prev => ({ ...prev, loading: false }));
+        return false;
+      }
+      
+      console.log('User does not exist, creating new user in Firebase...');
+      
+      // Create new user in Firebase
+      const newUserData = {
+        name,
+        email,
+        joinDate: new Date().toISOString().split('T')[0], // Store as YYYY-MM-DD format
+        subscription: 'free' as const
+      };
+      
+      console.log('Creating user with data:', newUserData);
+      const userId = await createUser(newUserData);
+      console.log('Firebase user created with ID:', userId);
+      
+      const newUser = { id: userId, ...newUserData };
+      
+      // Save credentials (for demo - in production, use Firebase Auth)
+      const credentials = getStoredCredentials();
+      const newCredential = { email, password, userId };
+      const updatedCredentials = [...credentials, newCredential];
+      saveCredentials(updatedCredentials);
+      
+      // Store user locally for session
+      localStorage.setItem('user', JSON.stringify(newUser));
+      
+      setAuthState({
+        user: newUser,
+        isAuthenticated: true,
+        loading: false
+      });
+      
+      console.log('User registered successfully in Firebase:', newUser);
+      return true;
+    } catch (error) {
+      console.error('Registration error:', error);
+      const errorDetails = error as any;
+      console.error('Full error details:', {
+        message: errorDetails?.message,
+        code: errorDetails?.code,
+        stack: errorDetails?.stack
+      });
+      
+      // Fallback to localStorage registration
+      console.log('Falling back to localStorage registration...');
       try {
+        const newUser: User = {
+          id: Date.now().toString(),
+          name,
+          email,
+          joinDate: new Date().toISOString().split('T')[0], // Store as YYYY-MM-DD format
+          subscription: 'free'
+        };
+        
+        // Save credentials
+        const credentials = getStoredCredentials();
+        const newCredential = { email, password, userId: newUser.id };
+        const updatedCredentials = [...credentials, newCredential];
+        saveCredentials(updatedCredentials);
+        
+        // Save to localStorage
         const storedUsers = localStorage.getItem('registered_users');
         const registeredUsers = storedUsers ? JSON.parse(storedUsers) : [];
         registeredUsers.push(newUser);
         localStorage.setItem('registered_users', JSON.stringify(registeredUsers));
-      } catch (error) {
-        console.error('Error saving registered user:', error);
+        localStorage.setItem('user', JSON.stringify(newUser));
+        
+        setAuthState({
+          user: newUser,
+          isAuthenticated: true,
+          loading: false
+        });
+        
+        console.log('User registered in localStorage as fallback:', newUser);
+        return true;
+      } catch (fallbackError) {
+        console.error('Fallback registration also failed:', fallbackError);
+        setAuthState(prev => ({ ...prev, loading: false }));
+        return false;
       }
-      
-      localStorage.setItem('user', JSON.stringify(newUser));
     }
-    
-    setAuthState({
-      user: newUser,
-      isAuthenticated: true,
-      loading: false
-    });
-    return true;
   };
 
   const logout = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('user');
-    }
+    localStorage.removeItem('user');
     setAuthState({
       user: null,
       isAuthenticated: false,
@@ -228,9 +261,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const updateProfile = (updates: Partial<User>) => {
     if (authState.user) {
       const updatedUser = { ...authState.user, ...updates };
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-      }
+      localStorage.setItem('user', JSON.stringify(updatedUser));
       setAuthState(prev => ({
         ...prev,
         user: updatedUser
@@ -246,7 +277,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         updateProfile
       }}
     >
-      {children}
+      {isClient ? children : <div>Loading...</div>}
     </AuthContext.Provider>
   );
 }

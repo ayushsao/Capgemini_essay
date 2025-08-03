@@ -7,6 +7,8 @@ import { EssayHistory } from '@/types/user';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import EssayResults from './EssayResults';
 import TransitionLoader from './TransitionLoader';
+import UserManagement from './UserManagement';
+import FirebaseTest from './FirebaseTest';
 
 // Dashboard component for user analytics and essay management
 // Updated for deployment compatibility
@@ -16,10 +18,11 @@ interface DashboardProps {
 
 export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
   const { user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<'overview' | 'essays' | 'progress' | 'profile'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'essays' | 'progress' | 'profile' | 'firebase'>('overview');
   const [viewingEssay, setViewingEssay] = useState<EssayHistory | null>(null);
   const [essayHistory, setEssayHistory] = useState<EssayHistory[]>([]);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [showUserManagement, setShowUserManagement] = useState(false);
   const [userStats, setUserStats] = useState({
     totalEssays: 0,
     averageScore: 0,
@@ -61,7 +64,7 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
   };
 
   // Handle tab switching with transition
-  const handleTabChange = async (newTab: 'overview' | 'essays' | 'progress' | 'profile') => {
+  const handleTabChange = async (newTab: 'overview' | 'essays' | 'progress' | 'profile' | 'firebase') => {
     if (newTab === activeTab) return;
     
     setIsTransitioning(true);
@@ -324,6 +327,25 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
                 )}
               </div>
               
+              {/* Admin button - only show for admin users */}
+              {user?.email === 'ayushsao32@gmail.com' && (
+                <div className="flex items-center space-x-2">
+                  <span className="hidden sm:inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    👑 Admin
+                  </span>
+                  <button
+                    onClick={() => setShowUserManagement(true)}
+                    className="text-gray-500 hover:text-gray-700 transition duration-200 p-1 sm:p-0"
+                    aria-label="User Management"
+                    title="User Management - View All Registered Users"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+              
               <button
                 onClick={logout}
                 className="text-gray-500 hover:text-gray-700 transition duration-200 p-1 sm:p-0"
@@ -346,11 +368,12 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
               { id: 'overview', name: 'Overview', icon: '📊' },
               { id: 'essays', name: 'My Essays', icon: '📝' },
               { id: 'progress', name: 'Progress', icon: '📈' },
-              { id: 'profile', name: 'Profile', icon: '👤' }
+              { id: 'profile', name: 'Profile', icon: '👤' },
+              ...(user?.email === 'ayushsao32@gmail.com' ? [{ id: 'firebase', name: 'Firebase Test', icon: '🔥' }] : [])
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => handleTabChange(tab.id as 'overview' | 'essays' | 'progress' | 'profile')}
+                onClick={() => handleTabChange(tab.id as 'overview' | 'essays' | 'progress' | 'profile' | 'firebase')}
                 className={`py-2 px-3 sm:px-4 border-b-2 font-medium text-sm whitespace-nowrap transition-all duration-200 flex-shrink-0 transform hover:scale-105 active:scale-95 cursor-pointer ${
                   activeTab === tab.id
                     ? 'border-blue-500 text-blue-600 bg-blue-50 rounded-t-lg'
@@ -365,7 +388,9 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
         </div>
 
         {/* Content */}
-        {viewingEssay ? (
+        {showUserManagement ? (
+          <UserManagement onBack={() => setShowUserManagement(false)} />
+        ) : viewingEssay ? (
           <div className="space-y-4 sm:space-y-6">
             {/* Back button and header */}
             <div className="flex items-center justify-between">
@@ -474,6 +499,14 @@ export default function Dashboard({ onNavigateToEssayWriter }: DashboardProps) {
                 />
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Firebase Test Tab */}
+        {!viewingEssay && activeTab === 'firebase' && (
+          <div className="space-y-4 sm:space-y-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Firebase Test Panel</h2>
+            <FirebaseTest />
           </div>
         )}
       </div>
