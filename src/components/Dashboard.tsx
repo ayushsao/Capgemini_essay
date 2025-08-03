@@ -7,6 +7,7 @@ import { EssayHistory } from '@/types/user';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 // Dashboard component for user analytics and essay management
+// Updated for deployment compatibility
 interface DashboardProps {
   onNavigateToEssayWriter: () => void;
 }
