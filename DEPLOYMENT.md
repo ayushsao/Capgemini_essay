@@ -1,8 +1,4 @@
-# Production Deployment Guide
 
-## Admin Login Credentials
-- **Email**: ayushsao32@gmail.com
-- **Password**: password
 
 ## Deployment Steps
 
@@ -51,8 +47,3 @@ npm run build
 npm start
 # Then test login on http://localhost:3000
 ```
-
-## Environment Variables Reference:
-- `NEXT_PUBLIC_APP_ENV`: Identifies environment (local/production)
-- `NEXT_PUBLIC_ADMIN_EMAIL`: Admin user email
-- `NEXT_PUBLIC_ADMIN_PASSWORD`: Admin user password
