@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
-import ProductionDiagnostic from "@/components/ProductionDiagnostic";
 
 export const metadata: Metadata = {
   title: "Capgemini Essay Writing Tutor",
@@ -18,7 +17,6 @@ export default function RootLayout({
       <body className="antialiased">
         <AuthProvider>
           {children}
-          <ProductionDiagnostic />
         </AuthProvider>
       </body>
     </html>
