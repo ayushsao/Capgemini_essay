@@ -8,7 +8,7 @@ A comprehensive essay analysis and writing improvement platform built with Next.
 - **Attractive Login/Register Interface** with modern design
 - **User Profile Management** with avatar and subscription tracking
 - **Session Management** with local storage persistence
-- **Demo Credentials**: john@example.com / password
+
 
 ### 📊 Personal Dashboard
 - **Overview Section** with welcome message and quick stats
@@ -57,16 +57,12 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## Demo Usage
 
-1. **Login** with demo credentials:
-   - Email: `john@example.com`
-   - Password: `password`
 
-2. **Explore Dashboard** features:
+1. **Explore Dashboard** features:
    - View your writing statistics
    - Check progress charts
    - Review essay history
-
-3. **Write Essays**:
+2  **Write Essays**:
    - Click "Start Writing" to access the essay editor
    - Type your essay and see real-time analysis
    - Get detailed feedback and scoring
