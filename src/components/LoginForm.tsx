@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import GoogleSignInButton from './GoogleSignInButton';
 
 interface LoginFormProps {
   onToggleMode: () => void;
@@ -16,7 +17,7 @@ export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
     confirmPassword: ''
   });
   const [error, setError] = useState('');
-  const { login, register, loading } = useAuth();
+  const { login, register, loginWithGoogle, loading } = useAuth();
 
   // Ensure form starts completely empty on mount
   useEffect(() => {
@@ -258,6 +259,24 @@ export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
                 </span>
               )}
             </button>
+          </div>
+
+          {/* Divider */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">Or continue with</span>
+            </div>
+          </div>
+
+          {/* Google Sign-In Button */}
+          <div>
+            <GoogleSignInButton 
+              onSignIn={loginWithGoogle}
+              loading={loading}
+            />
           </div>
 
           <div className="text-center">

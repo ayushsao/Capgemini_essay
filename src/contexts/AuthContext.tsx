@@ -3,11 +3,13 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, AuthState } from '@/types/user';
 import { createUser, getUserByEmail, getUsers } from '@/lib/firebaseServices';
+import { signInWithGoogle, signOutUser, onAuthStateChange } from '@/lib/googleAuth';
 import { AUTH_CONFIG, authLog } from '@/lib/authConfig';
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<boolean>;
   register: (name: string, email: string, password: string) => Promise<boolean>;
+  loginWithGoogle: () => Promise<boolean>;
   logout: () => void;
   updateProfile: (updates: Partial<User>) => void;
 }
@@ -266,7 +268,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         name,
         email,
         joinDate: new Date().toISOString().split('T')[0], // Store as YYYY-MM-DD format
-        subscription: 'free' as const
+        subscription: 'free' as const,
+        authProvider: 'email' as const
       };
       
       console.log('Creating user with data:', newUserData);
@@ -309,7 +312,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           name,
           email,
           joinDate: new Date().toISOString().split('T')[0], // Store as YYYY-MM-DD format
-          subscription: 'free'
+          subscription: 'free',
+          authProvider: 'email' as const
         };
         
         // Save credentials
@@ -341,8 +345,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const logout = () => {
+  const loginWithGoogle = async (): Promise<boolean> => {
+    console.log('🔍 Google login started');
+    setAuthState(prev => ({ ...prev, loading: true }));
+    
+    try {
+      const result = await signInWithGoogle();
+      
+      if (result.success && result.user) {
+        console.log('✅ Google login successful for user:', result.user.name);
+        
+        // Store user locally for session
+        localStorage.setItem('user', JSON.stringify(result.user));
+        
+        setAuthState({
+          user: result.user,
+          isAuthenticated: true,
+          loading: false
+        });
+        
+        return true;
+      } else {
+        console.log('❌ Google login failed:', result.error);
+        setAuthState(prev => ({ ...prev, loading: false }));
+        return false;
+      }
+    } catch (error) {
+      console.error('💥 Google login error:', error);
+      setAuthState(prev => ({ ...prev, loading: false }));
+      return false;
+    }
+  };
+
+  const logout = async () => {
+    // Sign out from Firebase if user was authenticated with Google
+    await signOutUser();
+    
+    // Clear local storage
     localStorage.removeItem('user');
+    
     setAuthState({
       user: null,
       isAuthenticated: false,
@@ -365,6 +406,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ...authState,
         login,
         register,
+        loginWithGoogle,
         logout,
         updateProfile
       }}

@@ -6,6 +6,7 @@ import LoginForm from './LoginForm';
 import Dashboard from './Dashboard';
 import EssayTutor from './EssayTutor';
 import Preloader from './Preloader';
+import UserProfile from './UserProfile';
 
 export default function App() {
   const { isAuthenticated, loading } = useAuth();
@@ -52,6 +53,9 @@ export default function App() {
                   Capgemini Essay Writing Tutor
                 </h1>
               </div>
+              
+              {/* User Profile in top-right */}
+              <UserProfile />
             </div>
           </div>
         </header>
