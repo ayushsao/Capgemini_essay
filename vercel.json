@@ -7,7 +7,13 @@
   "env": {
     "NEXT_PUBLIC_APP_ENV": "production",
     "NEXT_PUBLIC_ADMIN_EMAIL": "ayushsao32@gmail.com",
-    "NEXT_PUBLIC_ADMIN_PASSWORD": "password"
+    "NEXT_PUBLIC_ADMIN_PASSWORD": "password",
+    "NEXT_PUBLIC_FIREBASE_API_KEY": "AIzaSyB1HOfI6JzUtHFfF7HXyvRX57QLhO_gadw",
+    "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN": "capgemini-essay-tutor.firebaseapp.com",
+    "NEXT_PUBLIC_FIREBASE_PROJECT_ID": "capgemini-essay-tutor",
+    "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET": "capgemini-essay-tutor.firebasestorage.app",
+    "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "937900597976",
+    "NEXT_PUBLIC_FIREBASE_APP_ID": "1:937900597976:web:1dc56df0b6466a4201adad"
   },
   "functions": {
     "app/api/**/*.js": {
