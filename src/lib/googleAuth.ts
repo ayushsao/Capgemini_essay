@@ -13,8 +13,14 @@ export interface GoogleAuthResult {
 export const signInWithGoogle = async (): Promise<GoogleAuthResult> => {
   try {
     console.log('🚀 Starting Google Sign-In...');
+    console.log('🌐 Current domain:', window.location.hostname);
     console.log('🔧 Auth object:', auth);
     console.log('🔧 Google Provider:', googleProvider);
+    console.log('🔥 Firebase config check:', {
+      authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+      apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? 'Loaded' : 'Missing',
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    });
     
     // Additional validation checks
     if (!auth) {
@@ -119,13 +125,20 @@ export const signInWithGoogle = async (): Promise<GoogleAuthResult> => {
         case 'auth/popup-blocked':
           return { success: false, error: 'Popup was blocked by browser. Please allow popups and try again.' };
         case 'auth/unauthorized-domain':
-          return { success: false, error: 'This domain is not authorized for Google Sign-In. Please contact support.' };
+          return { 
+            success: false, 
+            error: `This domain (${window.location.hostname}) is not authorized for Google Sign-In. Please add it to Firebase Console → Authentication → Settings → Authorized domains.` 
+          };
         case 'auth/operation-not-allowed':
-          return { success: false, error: 'Google Sign-In is not enabled. Please contact support.' };
+          return { success: false, error: 'Google Sign-In is not enabled in Firebase. Please contact support.' };
         case 'auth/invalid-api-key':
-          return { success: false, error: 'Invalid Firebase configuration. Please contact support.' };
+          return { success: false, error: 'Invalid Firebase API key. Please check environment variables.' };
+        case 'auth/network-request-failed':
+          return { success: false, error: 'Network error. Please check your internet connection and Firebase configuration.' };
+        case 'auth/configuration-not-found':
+          return { success: false, error: 'Firebase configuration missing. Please check environment variables.' };
         default:
-          return { success: false, error: `Authentication error: ${firebaseError.message}` };
+          return { success: false, error: `Authentication error (${firebaseError.code}): ${firebaseError.message}` };
       }
     }
     

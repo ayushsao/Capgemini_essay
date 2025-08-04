@@ -32,12 +32,21 @@ const firebaseConfig = {
 };
 
 // Debug: Log configuration (only in development)
-if (process.env.NODE_ENV === 'development') {
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   console.log('🔧 Firebase Config Loaded:', {
     apiKey: firebaseConfig.apiKey ? '✅ Loaded' : '❌ Missing',
     authDomain: firebaseConfig.authDomain,
     projectId: firebaseConfig.projectId,
   });
+}
+
+// Production environment check
+if (typeof window !== 'undefined') {
+  const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+  if (isProduction) {
+    console.log('🌐 Production environment detected:', window.location.hostname);
+    console.log('🔥 Firebase Auth Domain:', firebaseConfig.authDomain);
+  }
 }
 
 // Initialize Firebase
