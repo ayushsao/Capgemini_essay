@@ -53,8 +53,6 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
-
 ## Demo Usage
 
 
@@ -75,7 +73,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - **Charts**: Recharts
 - **NLP**: Natural language processing for text analysis
 - **State Management**: React Context API
-- **Storage**: LocalStorage for demo purposes
+- **Storage**: Firebase
 
 ## Project Structure
 
