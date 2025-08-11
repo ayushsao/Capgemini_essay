@@ -99,15 +99,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isAuthenticated: false,
     loading: true
   });
-  const [isClient, setIsClient] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    // Set client flag and hydration flag to prevent hydration issues
-    setIsClient(true);
-    
-    // Ensure we're fully hydrated before accessing localStorage
+    // Only access localStorage after hydration on client side
     const initializeAuth = () => {
+      // Ensure we're on client side and component is mounted
+      if (typeof window === 'undefined') {
+        setAuthState(prev => ({ ...prev, loading: false }));
+        return;
+      }
+
       try {
         const storedUser = localStorage.getItem('user');
         
@@ -124,16 +125,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch (error) {
         console.error('❌ Error restoring user:', error);
-        localStorage.removeItem('user');
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('user');
+        }
         setAuthState(prev => ({ ...prev, loading: false }));
-      } finally {
-        setIsHydrated(true);
       }
     };
 
-    // Add a small delay to ensure proper hydration
-    const timer = setTimeout(initializeAuth, 100);
-    return () => clearTimeout(timer);
+    // Initialize immediately for server-side, with delay for client-side
+    if (typeof window === 'undefined') {
+      initializeAuth();
+    } else {
+      // Small delay to ensure proper hydration on client
+      const timer = setTimeout(initializeAuth, 0);
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
@@ -350,6 +356,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAuthState(prev => ({ ...prev, loading: true }));
     
     try {
+      // Check if we're in a browser environment
+      if (typeof window === 'undefined') {
+        console.error('❌ Google login attempted on server side');
+        setAuthState(prev => ({ ...prev, loading: false }));
+        return false;
+      }
+
+      // Pre-flight checks
+      console.log('🌐 Environment check:', {
+        hostname: window.location.hostname,
+        protocol: window.location.protocol,
+        userAgent: navigator.userAgent.substring(0, 50) + '...'
+      });
+
       const result = await signInWithGoogle();
       
       if (result.success && result.user) {
@@ -367,11 +387,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return true;
       } else {
         console.log('❌ Google login failed:', result.error);
+        
+        // Show user-friendly error message
+        if (result.error?.includes('unauthorized-domain')) {
+          console.error('Domain authorization issue:', result.error);
+        } else if (result.error?.includes('popup')) {
+          console.error('Popup issue:', result.error);
+        } else {
+          console.error('Generic Google login error:', result.error);
+        }
+        
         setAuthState(prev => ({ ...prev, loading: false }));
         return false;
       }
     } catch (error) {
-      console.error('💥 Google login error:', error);
+      console.error('💥 Google login critical error:', error);
       setAuthState(prev => ({ ...prev, loading: false }));
       return false;
     }
@@ -411,21 +441,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         updateProfile
       }}
     >
-      {isClient && isHydrated ? children : (
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          height: '100vh',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white'
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🎓</div>
-            <div>Loading Virtual Tutor...</div>
-          </div>
-        </div>
-      )}
+      {children}
     </AuthContext.Provider>
   );
 }

@@ -11,13 +11,50 @@ interface EssayEditorProps {
 
 export default function EssayEditor({ value, onChange, isAnalyzing, disabled = false }: EssayEditorProps) {
   const [wordCount, setWordCount] = useState(0);
+  const [pasteWarning, setPasteWarning] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
-    onChange(text);
-    
     const words = text.trim().split(/\s+/).filter(word => word.length > 0);
-    setWordCount(words.length);
+    
+    // Enforce 250-word limit
+    if (words.length <= 250) {
+      onChange(text);
+      setWordCount(words.length);
+    } else {
+      // If pasting would exceed limit, truncate to 250 words
+      const truncatedWords = text.trim().split(/\s+/).slice(0, 250);
+      const truncatedText = truncatedWords.join(' ');
+      onChange(truncatedText);
+      setWordCount(250);
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+    const pastedText = e.clipboardData.getData('text');
+    const currentText = value;
+    const selectionStart = e.currentTarget.selectionStart;
+    const selectionEnd = e.currentTarget.selectionEnd;
+    
+    // Create new text with pasted content
+    const newText = currentText.slice(0, selectionStart) + pastedText + currentText.slice(selectionEnd);
+    const words = newText.trim().split(/\s+/).filter(word => word.length > 0);
+    
+    if (words.length <= 250) {
+      onChange(newText);
+      setWordCount(words.length);
+      setPasteWarning(false);
+    } else {
+      // Truncate to 250 words if paste would exceed limit
+      const truncatedWords = newText.trim().split(/\s+/).slice(0, 250);
+      const truncatedText = truncatedWords.join(' ');
+      onChange(truncatedText);
+      setWordCount(250);
+      setPasteWarning(true);
+      // Clear warning after 3 seconds
+      setTimeout(() => setPasteWarning(false), 3000);
+    }
   };
 
   return (
@@ -43,8 +80,19 @@ export default function EssayEditor({ value, onChange, isAnalyzing, disabled = f
                   <span className="text-small font-medium">Analyzing...</span>
                 </div>
               )}
+              {pasteWarning && (
+                <div className="flex items-center space-x-2 text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.996-.833-2.5 0L4.268 15.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                  <span className="text-small font-medium">Text truncated to 250 words</span>
+                </div>
+              )}
               <div className="text-small text-gray-600">
-                <span className="font-medium">{wordCount}</span> words
+                <span className={`font-medium ${wordCount > 240 ? 'text-red-600' : wordCount > 220 ? 'text-yellow-600' : 'text-gray-600'}`}>
+                  {wordCount}/250
+                </span> words
+                {wordCount >= 250 && <span className="text-red-600 ml-2 font-semibold">• Limit reached</span>}
               </div>
             </div>
           </div>
@@ -55,6 +103,7 @@ export default function EssayEditor({ value, onChange, isAnalyzing, disabled = f
           <textarea
             value={value}
             onChange={handleChange}
+            onPaste={handlePaste}
             disabled={disabled}
             placeholder={disabled 
               ? "📝 Essay submitted successfully! Start a new essay to continue writing..." 
@@ -80,8 +129,18 @@ export default function EssayEditor({ value, onChange, isAnalyzing, disabled = f
             <div className="flex items-center space-x-4">
               <span>Characters: {value.length}</span>
               <span>•</span>
-              <span className={wordCount < 10 ? 'text-red-500' : wordCount < 50 ? 'text-yellow-600' : 'text-green-600'}>
-                {wordCount < 10 ? 'Keep writing...' : wordCount < 50 ? 'Good start!' : 'Great length!'}
+              <span className={
+                wordCount >= 250 ? 'text-red-600 font-semibold' :
+                wordCount > 240 ? 'text-red-500' :
+                wordCount > 220 ? 'text-yellow-600' :
+                wordCount < 10 ? 'text-red-500' : 
+                wordCount < 50 ? 'text-yellow-600' : 'text-green-600'
+              }>
+                {wordCount >= 250 ? 'Word limit reached!' :
+                 wordCount > 240 ? 'Almost at limit!' :
+                 wordCount > 220 ? 'Approaching limit...' :
+                 wordCount < 10 ? 'Keep writing...' : 
+                 wordCount < 50 ? 'Good start!' : 'Great progress!'}
               </span>
             </div>
             {!disabled && (
@@ -107,7 +166,7 @@ export default function EssayEditor({ value, onChange, isAnalyzing, disabled = f
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-small text-blue-700">
               <div className="flex items-start space-x-2">
                 <span className="text-blue-500 font-bold">•</span>
-                <span>Aim for 200-500 words for comprehensive analysis</span>
+                <span>Keep essays under 250 words for focused analysis</span>
               </div>
               <div className="flex items-start space-x-2">
                 <span className="text-blue-500 font-bold">•</span>

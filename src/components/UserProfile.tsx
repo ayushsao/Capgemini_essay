@@ -3,7 +3,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
-export default function UserProfile() {
+interface UserProfileProps {
+  onNavigateToDashboard?: () => void;
+  onNavigateToProfile?: () => void;
+}
+
+export default function UserProfile({ onNavigateToDashboard, onNavigateToProfile }: UserProfileProps) {
   const { user, logout } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
@@ -198,7 +203,7 @@ export default function UserProfile() {
             <button
               onClick={() => {
                 setIsDropdownOpen(false);
-                // Add profile edit functionality here if needed
+                onNavigateToProfile?.() || onNavigateToDashboard?.();
               }}
               className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition duration-200"
             >
@@ -211,7 +216,7 @@ export default function UserProfile() {
             <button
               onClick={() => {
                 setIsDropdownOpen(false);
-                // Add settings functionality here if needed
+                onNavigateToProfile?.() || onNavigateToDashboard?.();
               }}
               className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition duration-200"
             >

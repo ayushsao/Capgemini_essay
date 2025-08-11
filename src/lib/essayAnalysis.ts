@@ -5,7 +5,7 @@
  * Enhanced with LanguageTool API integration for comprehensive spelling analysis
  */
 
-import { EssayAnalysis, GrammarError, ImprovementArea } from '@/types/essay';
+import { EssayAnalysis, GrammarError, ImprovementArea, PlagiarismResult, PlagiarismMatch } from '@/types/essay';
 
 // Common misspellings and their corrections - expanded list
 const commonMisspellings: Record<string, string> = {
@@ -252,6 +252,118 @@ const grammarPatterns = [
   }
 ];
 
+// Common plagiarized content patterns and sources
+const commonPlagiarizedContent = [
+  { text: "education is the most powerful weapon which you can use to change the world", source: "Nelson Mandela Quote" },
+  { text: "to be or not to be that is the question", source: "Shakespeare's Hamlet" },
+  { text: "four score and seven years ago", source: "Lincoln's Gettysburg Address" },
+  { text: "i have a dream that one day", source: "Martin Luther King Jr. Speech" },
+  { text: "ask not what your country can do for you", source: "JFK Inaugural Address" },
+  { text: "the only thing we have to fear is fear itself", source: "FDR Speech" },
+  { text: "we hold these truths to be self evident", source: "Declaration of Independence" },
+  { text: "it was the best of times it was the worst of times", source: "Charles Dickens" },
+  { text: "in the beginning god created the heaven and the earth", source: "Bible Genesis" },
+  { text: "all men are created equal", source: "Declaration of Independence" },
+  { text: "the quick brown fox jumps over the lazy dog", source: "Common Typing Text" },
+  { text: "lorem ipsum dolor sit amet consectetur", source: "Lorem Ipsum Placeholder" },
+  { text: "global warming is one of the most serious issues", source: "Common Essay Template" },
+  { text: "technology has changed our lives in many ways", source: "Common Essay Template" },
+  { text: "social media has both positive and negative effects", source: "Common Essay Template" },
+  { text: "artificial intelligence is the future of technology", source: "Common Essay Template" },
+  { text: "climate change is a global crisis that requires", source: "Common Essay Template" },
+  { text: "the internet has revolutionized the way we communicate", source: "Common Essay Template" }
+];
+
+// Plagiarism detection function
+function detectPlagiarism(text: string): PlagiarismResult {
+  const cleanText = text.toLowerCase().replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  const matches: PlagiarismMatch[] = [];
+  let totalSimilarity = 0;
+  let matchedWords = 0;
+  const totalWords = cleanText.split(' ').length;
+
+  // Check against known plagiarized content
+  commonPlagiarizedContent.forEach(item => {
+    const sourceText = item.text.toLowerCase().replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ');
+    const sourceWords = sourceText.split(' ');
+    
+    // Check for exact phrase matches (3+ consecutive words)
+    for (let i = 0; i <= sourceWords.length - 3; i++) {
+      const phrase = sourceWords.slice(i, i + 3).join(' ');
+      if (cleanText.includes(phrase)) {
+        const position = cleanText.indexOf(phrase);
+        matches.push({
+          text: phrase,
+          source: item.source,
+          similarity: 100,
+          position: position
+        });
+        matchedWords += 3;
+        totalSimilarity += 100;
+      }
+    }
+    
+    // Check for partial matches (50%+ word overlap)
+    const overlap = sourceWords.filter(word => cleanText.includes(word)).length;
+    const similarity = (overlap / sourceWords.length) * 100;
+    
+    if (similarity >= 50 && overlap >= 4) {
+      matches.push({
+        text: sourceWords.slice(0, Math.min(8, sourceWords.length)).join(' ') + '...',
+        source: item.source,
+        similarity: Math.round(similarity),
+        position: cleanText.indexOf(sourceWords[0])
+      });
+      matchedWords += overlap;
+      totalSimilarity += similarity;
+    }
+  });
+
+  // Check for repetitive content patterns (self-plagiarism)
+  const sentences = cleanText.split(/[.!?]+/).filter(s => s.trim().length > 10);
+  const sentenceCounts: Record<string, number> = {};
+  
+  sentences.forEach(sentence => {
+    const cleanSentence = sentence.trim();
+    if (cleanSentence.length > 15) {
+      sentenceCounts[cleanSentence] = (sentenceCounts[cleanSentence] || 0) + 1;
+    }
+  });
+
+  // Detect repeated sentences
+  Object.entries(sentenceCounts).forEach(([sentence, count]) => {
+    if (count > 1) {
+      matches.push({
+        text: sentence.substring(0, 50) + '...',
+        source: 'Self-Repetition',
+        similarity: count * 25, // 25% penalty per repetition
+        position: cleanText.indexOf(sentence)
+      });
+      totalSimilarity += count * 25;
+    }
+  });
+
+  // Calculate overall plagiarism percentage
+  const uniqueMatches = Array.from(new Set(matches.map(m => m.text)));
+  const plagiarismPercentage = Math.min(100, Math.round((matchedWords / Math.max(totalWords, 1)) * 100));
+  
+  // Determine score based on plagiarism level
+  let score = 10;
+  if (plagiarismPercentage >= 50) score = 1; // Severe plagiarism
+  else if (plagiarismPercentage >= 30) score = 3; // High plagiarism
+  else if (plagiarismPercentage >= 15) score = 6; // Moderate plagiarism
+  else if (plagiarismPercentage >= 5) score = 8; // Minor plagiarism
+  else if (plagiarismPercentage > 0) score = 9; // Very minor plagiarism
+
+  return {
+    score: score,
+    maxScore: 10,
+    percentage: plagiarismPercentage,
+    isOriginal: plagiarismPercentage < 5,
+    matches: uniqueMatches.length > 0 ? matches.slice(0, 5) : undefined // Limit to 5 matches
+  };
+}
+
 export function analyzeEssay(text: string): EssayAnalysis {
   const words = text.trim().split(/\s+/).filter(word => word.length > 0);
   const wordCount = words.length;
@@ -262,10 +374,11 @@ export function analyzeEssay(text: string): EssayAnalysis {
       wordCount: { score: 0, maxScore: 10 },
       spellingAccuracy: { score: 0, maxScore: 10 },
       grammarEvaluation: { score: 0, maxScore: 10 },
+      plagiarismCheck: { score: 0, maxScore: 10, percentage: 0, isOriginal: true },
       backspaceScore: { score: 0, maxScore: 10 },
       deleteScore: { score: 0, maxScore: 10 },
       totalMarks: 0,
-      maxTotalMarks: 50,
+      maxTotalMarks: 60,
       grammarErrors: [],
       suggestions: ['Please write a substantial essay to receive meaningful feedback.'],
       improvementAreas: []
@@ -281,14 +394,17 @@ export function analyzeEssay(text: string): EssayAnalysis {
   // Grammar Evaluation
   const grammarResults = analyzeGrammar(text);
   
+  // Plagiarism Check
+  const plagiarismResults = detectPlagiarism(text);
+  
   // Typing Behavior Analysis (placeholder scores)
   const backspaceScore = calculateTypingScore(wordCount, 'backspace');
   const deleteScore = calculateTypingScore(wordCount, 'delete');
   
-  // Calculate total score
+  // Calculate total score (now includes plagiarism)
   const totalMarks = wordCountScore.score + spellingResults.score + 
-                    grammarResults.score + backspaceScore.score + deleteScore.score;
-  const maxTotalMarks = 50;
+                    grammarResults.score + plagiarismResults.score + backspaceScore.score + deleteScore.score;
+  const maxTotalMarks = 60;
   
   // Generate improvement suggestions
   const suggestions = generateSuggestions(wordCount, spellingResults, grammarResults);
@@ -301,6 +417,7 @@ export function analyzeEssay(text: string): EssayAnalysis {
     wordCount: wordCountScore,
     spellingAccuracy: spellingResults,
     grammarEvaluation: grammarResults,
+    plagiarismCheck: plagiarismResults,
     backspaceScore,
     deleteScore,
     totalMarks,
@@ -322,10 +439,11 @@ export async function analyzeEssayWithAPI(text: string): Promise<EssayAnalysis> 
       wordCount: { score: 0, maxScore: 10 },
       spellingAccuracy: { score: 0, maxScore: 10 },
       grammarEvaluation: { score: 0, maxScore: 10 },
+      plagiarismCheck: { score: 0, maxScore: 10, percentage: 0, isOriginal: true },
       backspaceScore: { score: 0, maxScore: 10 },
       deleteScore: { score: 0, maxScore: 10 },
       totalMarks: 0,
-      maxTotalMarks: 50,
+      maxTotalMarks: 60,
       grammarErrors: [],
       suggestions: ['Please write a substantial essay to receive meaningful feedback.'],
       improvementAreas: [],
@@ -339,17 +457,20 @@ export async function analyzeEssayWithAPI(text: string): Promise<EssayAnalysis> 
   // Enhanced Spelling Accuracy Evaluation using API
   const spellingResults = await analyzeSpellingWithAPI(text);
   
-  // Grammar Evaluation
-  const grammarResults = analyzeGrammar(text);
+  // Enhanced Grammar Evaluation with multiple APIs
+  const grammarResults = await analyzeGrammarWithAPIs(text);
+  
+  // Plagiarism Check
+  const plagiarismResults = detectPlagiarism(text);
   
   // Typing Behavior Analysis (placeholder scores)
   const backspaceScore = calculateTypingScore(wordCount, 'backspace');
   const deleteScore = calculateTypingScore(wordCount, 'delete');
   
-  // Calculate total score
+  // Calculate total score (now includes plagiarism)
   const totalMarks = wordCountScore.score + spellingResults.score + 
-                    grammarResults.score + backspaceScore.score + deleteScore.score;
-  const maxTotalMarks = 50;
+                    grammarResults.score + plagiarismResults.score + backspaceScore.score + deleteScore.score;
+  const maxTotalMarks = 60;
   
   // Generate improvement suggestions
   const suggestions = generateSuggestions(wordCount, spellingResults, grammarResults);
@@ -362,6 +483,7 @@ export async function analyzeEssayWithAPI(text: string): Promise<EssayAnalysis> 
     wordCount: wordCountScore,
     spellingAccuracy: spellingResults,
     grammarEvaluation: grammarResults,
+    plagiarismCheck: plagiarismResults,
     backspaceScore,
     deleteScore,
     totalMarks,
@@ -631,6 +753,398 @@ function analyzeSpelling(words: string[]): { score: number; maxScore: number } {
   }
   
   return { score, maxScore };
+}
+
+// Enhanced version with configurable grammar analysis
+export async function analyzeEssayWithAdvancedGrammar(text: string, useAdvancedGrammar: boolean = true): Promise<EssayAnalysis> {
+  const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+  const wordCount = words.length;
+  
+  // If no meaningful content, return all zeros
+  if (wordCount === 0 || text.trim().length < 10) {
+    return {
+      wordCount: { score: 0, maxScore: 10 },
+      spellingAccuracy: { score: 0, maxScore: 10 },
+      grammarEvaluation: { score: 0, maxScore: 10 },
+      plagiarismCheck: { score: 0, maxScore: 10, percentage: 0, isOriginal: true },
+      backspaceScore: { score: 0, maxScore: 10 },
+      deleteScore: { score: 0, maxScore: 10 },
+      totalMarks: 0,
+      maxTotalMarks: 60,
+      grammarErrors: [],
+      suggestions: ['Please write a substantial essay to receive meaningful feedback.'],
+      improvementAreas: [],
+      spellingErrors: []
+    };
+  }
+  
+  // Word Count Evaluation (target: 200-500 words)
+  const wordCountScore = calculateWordCountScore(wordCount);
+  
+  // Enhanced Spelling Accuracy Evaluation using API
+  const spellingResults = await analyzeSpellingWithAPI(text);
+  
+  // Choose grammar analysis method based on setting
+  const grammarResults = useAdvancedGrammar 
+    ? await analyzeGrammarWithAPIs(text)
+    : analyzeGrammarLocal(text);
+  
+  // Plagiarism Check
+  const plagiarismResults = detectPlagiarism(text);
+  
+  // Typing Behavior Analysis (placeholder scores)
+  const backspaceScore = calculateTypingScore(wordCount, 'backspace');
+  const deleteScore = calculateTypingScore(wordCount, 'delete');
+  
+  // Calculate total score (now includes plagiarism)
+  const totalMarks = wordCountScore.score + spellingResults.score + 
+                    grammarResults.score + plagiarismResults.score + backspaceScore.score + deleteScore.score;
+  const maxTotalMarks = 60;
+  
+  // Generate improvement suggestions
+  const suggestions = generateSuggestions(wordCount, spellingResults, grammarResults);
+  const improvementAreas = generateImprovementAreas(
+    wordCountScore, spellingResults, grammarResults, 
+    backspaceScore, deleteScore, wordCount, grammarResults.errors || []
+  );
+  
+  return {
+    wordCount: wordCountScore,
+    spellingAccuracy: spellingResults,
+    grammarEvaluation: grammarResults,
+    plagiarismCheck: plagiarismResults,
+    backspaceScore,
+    deleteScore,
+    totalMarks,
+    maxTotalMarks,
+    grammarErrors: grammarResults.errors || [],
+    suggestions,
+    improvementAreas,
+    spellingErrors: spellingResults.errors || []
+  };
+}
+async function analyzeGrammarWithAPIs(text: string): Promise<{ score: number; maxScore: number; errors?: GrammarError[] }> {
+  const maxScore = 10;
+  const allErrors: GrammarError[] = [];
+  
+  // Need sufficient content to properly evaluate grammar
+  const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+  if (words.length < 5) {
+    return { score: 0, maxScore, errors: allErrors };
+  }
+
+  try {
+    // Try multiple grammar APIs for comprehensive analysis
+    const [languageToolErrors, grammarlyErrors, localErrors] = await Promise.allSettled([
+      analyzeWithLanguageTool(text),
+      analyzeWithGrammarly(text),
+      Promise.resolve(analyzeGrammarLocal(text))
+    ]);
+
+    // Combine results from all APIs
+    if (languageToolErrors.status === 'fulfilled') {
+      allErrors.push(...languageToolErrors.value);
+    }
+    
+    if (grammarlyErrors.status === 'fulfilled') {
+      allErrors.push(...grammarlyErrors.value);
+    }
+    
+    if (localErrors.status === 'fulfilled') {
+      allErrors.push(...localErrors.value.errors || []);
+    }
+
+    // Remove duplicate errors (same position or similar text)
+    const uniqueErrors = removeDuplicateErrors(allErrors);
+
+    // Calculate score based on error density
+    const wordCount = words.length;
+    const errorRate = uniqueErrors.length / Math.max(wordCount / 10, 1);
+    
+    let score = maxScore;
+    
+    // More comprehensive scoring with API results - FIXED to properly penalize errors
+    if (uniqueErrors.length === 0) {
+      score = maxScore; // Perfect grammar
+    } else {
+      // Strict scoring - even 1 error should reduce score significantly
+      const errorCount = uniqueErrors.length;
+      
+      // Base penalty for having any errors at all
+      score = maxScore - 1; // Start with 9/10 for any errors
+      
+      // Additional penalties based on error count
+      if (errorCount >= 5) score = Math.max(1, score - 6); // 5+ errors = very poor (1-3 points)
+      else if (errorCount >= 4) score = Math.max(2, score - 5); // 4 errors = poor (2-4 points)
+      else if (errorCount >= 3) score = Math.max(3, score - 4); // 3 errors = below average (3-5 points)
+      else if (errorCount >= 2) score = Math.max(5, score - 3); // 2 errors = fair (5-6 points)
+      else if (errorCount === 1) score = Math.max(7, score - 1); // 1 error = good (7-8 points)
+      
+      // Additional penalty based on error density for longer texts
+      if (errorRate > 2) score = Math.max(1, score - 2);
+      else if (errorRate > 1) score = Math.max(2, score - 1);
+    }
+
+    // Content length adjustments
+    if (wordCount < 15) {
+      score = Math.min(score, 3);
+    } else if (wordCount < 30) {
+      score = Math.min(score, 6);
+    } else if (wordCount < 50) {
+      score = Math.min(score, 8);
+    }
+
+    // Bonus for longer essays with excellent grammar
+    if (wordCount >= 150 && uniqueErrors.length === 0) {
+      score = maxScore;
+    } else if (wordCount >= 100 && uniqueErrors.length <= 1) {
+      score = Math.min(maxScore, score + 1);
+    }
+
+    return { 
+      score: Math.max(0, Math.min(maxScore, Math.round(score))), 
+      maxScore, 
+      errors: uniqueErrors 
+    };
+
+  } catch (error) {
+    console.warn('Error with grammar APIs, falling back to local analysis:', error);
+    return analyzeGrammarLocal(text);
+  }
+}
+
+// LanguageTool API for grammar checking
+async function analyzeWithLanguageTool(text: string): Promise<GrammarError[]> {
+  const response = await fetch('https://api.languagetool.org/v2/check', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({
+      text: text,
+      language: 'en-US',
+      enabledOnly: 'false',
+      // Focus on grammar and style errors
+      enabledCategories: 'GRAMMAR,STYLE,TYPOGRAPHY,CONFUSED_WORDS',
+      disabledCategories: 'TYPOS,SPELLING'
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error('LanguageTool API failed');
+  }
+
+  const data = await response.json();
+  const grammarErrors = data.matches.filter((match: any) => 
+    match.rule.category.id === 'GRAMMAR' || 
+    match.rule.category.id === 'STYLE' ||
+    match.rule.category.id === 'TYPOGRAPHY' ||
+    match.rule.category.id === 'CONFUSED_WORDS'
+  );
+
+  return grammarErrors.map((error: any) => ({
+    text: text.substring(error.offset, error.offset + error.length),
+    position: error.offset,
+    suggestions: error.replacements?.map((r: any) => r.value) || [error.message],
+    severity: error.rule.category.id === 'GRAMMAR' ? 'error' : 'warning',
+    source: 'LanguageTool'
+  }));
+}
+
+// Grammarly API integration (using their public API endpoint)
+async function analyzeWithGrammarly(text: string): Promise<GrammarError[]> {
+  try {
+    // Note: This is a simplified example. In production, you'd need proper Grammarly API credentials
+    // For demo purposes, we'll simulate Grammarly-style checks with enhanced patterns
+    
+    const grammarlyPatterns = [
+      // Enhanced grammar patterns that Grammarly typically catches
+      {
+        pattern: /\b(I|me)\s+and\s+\w+/gi,
+        message: 'Consider putting yourself last in a series (e.g., "John and I" instead of "I and John")',
+        category: 'ETIQUETTE'
+      },
+      {
+        pattern: /\bwho\s+(is|are|was|were)\s+\w+ing\b/gi,
+        message: 'Consider using "whom" instead of "who" when it\'s the object of a verb or preposition',
+        category: 'GRAMMAR'
+      },
+      {
+        pattern: /\b(less|fewer)\s+(people|students|books|cars|items|things)/gi,
+        message: 'Use "fewer" with countable nouns and "less" with uncountable nouns',
+        category: 'GRAMMAR'
+      },
+      {
+        pattern: /\b(much|many)\s+(water|time|money|information|advice)/gi,
+        message: 'Use "much" with uncountable nouns and "many" with countable nouns',
+        category: 'GRAMMAR'
+      },
+      {
+        pattern: /\b(between|among)\s+\w+\s+and\s+\w+\s+and\s+\w+/gi,
+        message: 'Use "among" when referring to three or more items, "between" for two items',
+        category: 'GRAMMAR'
+      },
+      {
+        pattern: /\b(lay|lie)\s+(down|on|in)/gi,
+        message: 'Use "lay" when placing something down (transitive), "lie" when reclining (intransitive)',
+        category: 'GRAMMAR'
+      },
+      {
+        pattern: /\b(good|well)\s+(doing|performed|executed|written)/gi,
+        message: 'Use "well" as an adverb to modify verbs, "good" as an adjective to modify nouns',
+        category: 'GRAMMAR'
+      },
+      {
+        pattern: /\b(who|whom)\s+(I|we|you|they|he|she)\s+(think|believe|know|assume)/gi,
+        message: 'In clauses with "I think/believe," use "who" for the subject',
+        category: 'GRAMMAR'
+      },
+      {
+        pattern: /\b(comprise|include)\s+of\b/gi,
+        message: 'Use "comprise" without "of" (The team comprises five members) or use "consist of"',
+        category: 'GRAMMAR'
+      },
+      {
+        pattern: /\b(irregardless)\b/gi,
+        message: 'Use "regardless" instead of "irregardless"',
+        category: 'GRAMMAR'
+      },
+      {
+        pattern: /\b(very|really|quite|extremely)\s+(unique|perfect|dead|pregnant|impossible)/gi,
+        message: 'Avoid intensifying absolute adjectives like "unique," "perfect," or "impossible"',
+        category: 'STYLE'
+      },
+      {
+        pattern: /\b(impact)\s+(on)\b/gi,
+        message: 'Consider using "effect on" or "influence on" instead of "impact on" for more precise writing',
+        category: 'STYLE'
+      }
+    ];
+
+    const errors: GrammarError[] = [];
+    
+    grammarlyPatterns.forEach(pattern => {
+      const matches = text.matchAll(pattern.pattern);
+      for (const match of matches) {
+        if (match.index !== undefined) {
+          errors.push({
+            text: match[0],
+            position: match.index,
+            suggestions: [pattern.message],
+            severity: pattern.category === 'GRAMMAR' ? 'error' : 'suggestion',
+            source: 'Grammarly-Style'
+          });
+        }
+      }
+    });
+
+    // Add passive voice detection (Grammarly specialty)
+    const passivePattern = /\b(is|are|was|were|being|been)\s+\w+ed\b/gi;
+    const passiveMatches = text.matchAll(passivePattern);
+    let passiveCount = 0;
+    
+    for (const match of passiveMatches) {
+      passiveCount++;
+      if (passiveCount > 2 && match.index !== undefined) { // Only flag if there are many passive constructions
+        errors.push({
+          text: match[0],
+          position: match.index,
+          suggestions: ['Consider using active voice for more engaging writing'],
+          severity: 'suggestion',
+          source: 'Grammarly-Style'
+        });
+      }
+    }
+
+    return errors;
+
+  } catch (error) {
+    console.warn('Grammarly-style analysis failed:', error);
+    return [];
+  }
+}
+
+// Local grammar analysis (fallback)
+function analyzeGrammarLocal(text: string): { score: number; maxScore: number; errors?: GrammarError[] } {
+  const maxScore = 10;
+  const errors: GrammarError[] = [];
+  
+  // Need sufficient content to properly evaluate grammar
+  const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+  if (words.length < 5) {
+    return { score: 0, maxScore, errors };
+  }
+  
+  // Check against all grammar patterns
+  grammarPatterns.forEach(pattern => {
+    const matches = text.matchAll(pattern.pattern);
+    for (const match of matches) {
+      if (match.index !== undefined) {
+        errors.push({
+          text: match[0],
+          position: match.index,
+          suggestions: [pattern.suggestion],
+          source: 'Local'
+        });
+      }
+    }
+  });
+  
+  // Calculate score based on error density - FIXED to match API scoring
+  const wordCount = words.length;
+  const errorCount = errors.length;
+  
+  let score = maxScore;
+  
+  // Use same scoring logic as API version for consistency
+  if (errorCount === 0) {
+    score = maxScore; // Perfect grammar
+  } else {
+    // Base penalty for having any errors at all
+    score = maxScore - 1; // Start with 9/10 for any errors
+    
+    // Additional penalties based on error count
+    if (errorCount >= 5) score = Math.max(1, score - 6); // 5+ errors = very poor (1-3 points)
+    else if (errorCount >= 4) score = Math.max(2, score - 5); // 4 errors = poor (2-4 points)
+    else if (errorCount >= 3) score = Math.max(3, score - 4); // 3 errors = below average (3-5 points)
+    else if (errorCount >= 2) score = Math.max(5, score - 3); // 2 errors = fair (5-6 points)
+    else if (errorCount === 1) score = Math.max(7, score - 1); // 1 error = good (7-8 points)
+    
+    // Additional penalty for high error density
+    const errorRate = errorCount / Math.max(wordCount / 10, 1);
+    if (errorRate > 2) score = Math.max(1, score - 2);
+    else if (errorRate > 1) score = Math.max(2, score - 1);
+  }
+  
+  // Content length adjustments
+  if (words.length < 15) {
+    score = Math.min(score, 3);
+  } else if (words.length < 30) {
+    score = Math.min(score, 5);
+  } else if (words.length < 50) {
+    score = Math.min(score, 7);
+  }
+  
+  score = Math.max(0, Math.min(maxScore, Math.round(score * 2) / 2));
+  
+  return { score, maxScore, errors };
+}
+
+// Remove duplicate errors from multiple APIs
+function removeDuplicateErrors(errors: GrammarError[]): GrammarError[] {
+  const uniqueErrors: GrammarError[] = [];
+  const seen = new Set<string>();
+  
+  errors.forEach(error => {
+    // Create a unique key based on position and text
+    const key = `${error.position}-${error.text.toLowerCase().trim()}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueErrors.push(error);
+    }
+  });
+  
+  return uniqueErrors;
 }
 
 function analyzeGrammar(text: string): { score: number; maxScore: number; errors?: GrammarError[] } {

@@ -65,7 +65,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
             <span className="text-4xl">📚</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
-            Capgemini Essay Tutor
+            EssayPolish
           </h1>
           <p className="text-blue-100 text-lg">
             AI-Powered Writing Assistant

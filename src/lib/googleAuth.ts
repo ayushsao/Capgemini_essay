@@ -14,81 +14,89 @@ export const signInWithGoogle = async (): Promise<GoogleAuthResult> => {
   try {
     console.log('🚀 Starting Google Sign-In...');
     console.log('🌐 Current domain:', window.location.hostname);
-    console.log('🔧 Auth object:', auth);
-    console.log('🔧 Google Provider:', googleProvider);
-    console.log('🔥 Firebase config check:', {
-      authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-      apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? 'Loaded' : 'Missing',
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
-    });
+    console.log('🌐 Current URL:', window.location.href);
     
-    // Additional validation checks
+    // Pre-flight checks
     if (!auth) {
-      throw new Error('Firebase Auth is not initialized. Please check your Firebase configuration.');
+      console.error('❌ Firebase Auth is not initialized');
+      return { success: false, error: 'Firebase Auth is not initialized. Please refresh the page and try again.' };
     }
     
     if (!googleProvider) {
-      throw new Error('Google Auth Provider is not configured. Please check your Firebase setup.');
+      console.error('❌ Google Auth Provider is not configured');
+      return { success: false, error: 'Google Sign-In is not properly configured. Please contact support.' };
+    }
+    
+    // Additional environment checks
+    console.log('🔥 Firebase config check:', {
+      authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'capgemini-essay-tutor.firebaseapp.com',
+      apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? 'Loaded' : 'Using fallback',
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'capgemini-essay-tutor'
+    });
+    
+    // Check if we're on localhost and provide specific guidance
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (isLocalhost) {
+      console.log('🏠 Running on localhost - ensuring localhost is in authorized domains');
     }
     
     console.log('🔑 Attempting signInWithPopup...');
-    const result = await signInWithPopup(auth, googleProvider);
-    console.log('✅ Google Sign-In popup completed:', result);
+    
+    // Set a timeout for the popup
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Sign-in timeout - popup may have been blocked')), 30000);
+    });
+    
+    const signInPromise = signInWithPopup(auth, googleProvider);
+    
+    // Race between sign-in and timeout
+    const result = await Promise.race([signInPromise, timeoutPromise]);
+    
+    console.log('✅ Google Sign-In popup completed successfully');
     
     const firebaseUser = result.user;
-    console.log('👤 Firebase User object:', {
+    console.log('👤 Firebase User received:', {
       uid: firebaseUser.uid,
       email: firebaseUser.email,
       displayName: firebaseUser.displayName,
-      photoURL: firebaseUser.photoURL,
-      providerId: firebaseUser.providerId
+      photoURL: firebaseUser.photoURL
     });
 
     if (!firebaseUser.email) {
       console.error('❌ No email found in Google account');
-      return { success: false, error: 'No email found in Google account' };
+      return { success: false, error: 'No email found in your Google account. Please use a different account or sign up manually.' };
     }
 
-    console.log('📧 User email:', firebaseUser.email);
-    console.log('📷 Photo URL from Google:', firebaseUser.photoURL);
+    console.log('📧 Processing user with email:', firebaseUser.email);
 
     // Check if user already exists in Firestore
     console.log('🔍 Checking if user exists in Firestore...');
     let existingUser = await getUserByEmail(firebaseUser.email);
 
     if (existingUser) {
-      // User exists, but let's update their avatar and name if they've changed
-      console.log('👤 Existing user found, checking for updates...');
+      console.log('👤 Existing user found:', existingUser.name);
       
+      // Update user data if needed
       let needsUpdate = false;
       const updates: Partial<User> = {};
       
-      // Check if avatar needs updating
       if (firebaseUser.photoURL && firebaseUser.photoURL !== existingUser.avatar) {
         updates.avatar = firebaseUser.photoURL;
         needsUpdate = true;
-        console.log('📷 Avatar needs updating:', firebaseUser.photoURL);
+        console.log('📷 Updating avatar');
       }
       
-      // Check if name needs updating
       if (firebaseUser.displayName && firebaseUser.displayName !== existingUser.name) {
         updates.name = firebaseUser.displayName;
         needsUpdate = true;
-        console.log('👤 Name needs updating:', firebaseUser.displayName);
+        console.log('👤 Updating display name');
       }
       
-      if (needsUpdate) {
-        console.log('🔄 Updating user data...');
-        // Update the user in Firebase (you'll need to implement updateUser function)
-        const updatedUser = { ...existingUser, ...updates };
-        console.log('✅ User updated with new data:', updatedUser);
-        return { success: true, user: updatedUser };
-      }
-      
-      console.log('✅ Using existing user data');
-      return { success: true, user: existingUser };
+      const finalUser = needsUpdate ? { ...existingUser, ...updates } : existingUser;
+      console.log('✅ Using user data:', finalUser.name);
+      return { success: true, user: finalUser };
     } else {
-      // Create new user in Firestore
+      // Create new user
       const newUserData = {
         name: firebaseUser.displayName || 'Google User',
         email: firebaseUser.email,
@@ -100,49 +108,95 @@ export const signInWithGoogle = async (): Promise<GoogleAuthResult> => {
 
       console.log('💾 Creating new user in Firestore...');
       const userId = await createUser(newUserData);
-      console.log('✅ User created with ID:', userId);
+      console.log('✅ New user created with ID:', userId);
       
       const newUser: User = { id: userId, ...newUserData };
-      console.log('🎯 Final user object:', newUser);
-      
       return { success: true, user: newUser };
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('💥 Google sign-in error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    console.error('💥 Error message:', errorMessage);
     
-    // Check if it's a Firebase Auth error
+    // Handle specific Firebase Auth error codes
     if (error && typeof error === 'object' && 'code' in error) {
       const firebaseError = error as any;
-      console.error('🔥 Firebase error code:', firebaseError.code);
-      console.error('🔥 Firebase error message:', firebaseError.message);
+      console.error('🔥 Firebase error details:', {
+        code: firebaseError.code,
+        message: firebaseError.message,
+        customData: firebaseError.customData
+      });
       
-      // Provide specific error messages for common issues
       switch (firebaseError.code) {
         case 'auth/popup-closed-by-user':
-          return { success: false, error: 'Sign-in was cancelled. Please try again.' };
-        case 'auth/popup-blocked':
-          return { success: false, error: 'Popup was blocked by browser. Please allow popups and try again.' };
-        case 'auth/unauthorized-domain':
           return { 
             success: false, 
-            error: `This domain (${window.location.hostname}) is not authorized for Google Sign-In. Please add it to Firebase Console → Authentication → Settings → Authorized domains.` 
+            error: 'Sign-in was cancelled. Please try again and complete the Google sign-in process.' 
           };
+          
+        case 'auth/popup-blocked':
+          return { 
+            success: false, 
+            error: 'Popup was blocked by your browser. Please allow popups for this site and try again.' 
+          };
+          
+        case 'auth/unauthorized-domain':
+          const currentDomain = window.location.hostname;
+          return { 
+            success: false, 
+            error: `Domain authorization required. The domain "${currentDomain}" needs to be added to Firebase authorized domains. Please contact support or try from an authorized domain.` 
+          };
+          
         case 'auth/operation-not-allowed':
-          return { success: false, error: 'Google Sign-In is not enabled in Firebase. Please contact support.' };
+          return { 
+            success: false, 
+            error: 'Google Sign-In is not enabled. Please contact support or use email sign-in instead.' 
+          };
+          
         case 'auth/invalid-api-key':
-          return { success: false, error: 'Invalid Firebase API key. Please check environment variables.' };
+          return { 
+            success: false, 
+            error: 'Invalid Firebase configuration. Please contact support.' 
+          };
+          
         case 'auth/network-request-failed':
-          return { success: false, error: 'Network error. Please check your internet connection and Firebase configuration.' };
+          return { 
+            success: false, 
+            error: 'Network error. Please check your internet connection and try again.' 
+          };
+          
         case 'auth/configuration-not-found':
-          return { success: false, error: 'Firebase configuration missing. Please check environment variables.' };
+          return { 
+            success: false, 
+            error: 'Firebase configuration missing. Please contact support.' 
+          };
+          
+        case 'auth/internal-error':
+          return {
+            success: false,
+            error: 'Internal authentication error. Please try again or use email sign-in.'
+          };
+          
         default:
-          return { success: false, error: `Authentication error (${firebaseError.code}): ${firebaseError.message}` };
+          return { 
+            success: false, 
+            error: `Authentication failed (${firebaseError.code}). Please try again or use email sign-in.` 
+          };
       }
     }
     
-    return { success: false, error: errorMessage };
+    // Handle timeout errors
+    if (error.message && error.message.includes('timeout')) {
+      return {
+        success: false,
+        error: 'Sign-in timed out. This may be due to popup blockers or slow internet. Please try again.'
+      };
+    }
+    
+    // Generic error fallback
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    return { 
+      success: false, 
+      error: `Sign-in failed: ${errorMessage}. Please try email sign-in instead.` 
+    };
   }
 };
 

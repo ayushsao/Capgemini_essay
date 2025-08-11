@@ -2,7 +2,7 @@
   "name": "virtual-tutor",
   "version": "0.1.0",
   "author": "Ayush Kumar Sao",
-  "description": "Capgemini Essay Writing Tutor - A comprehensive essay analysis and writing improvement platform",
+  "description": "EssayPolish - A comprehensive essay analysis and writing improvement platform powered by AI",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",

@@ -8,13 +8,14 @@ interface EssayResultsProps {
   isSubmitted?: boolean;
 }
 
-const COLORS = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6'];
+const COLORS = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#06B6D4'];
 
 export default function EssayResults({ analysis }: EssayResultsProps) {
   const {
     wordCount,
     spellingAccuracy,
     grammarEvaluation,
+    plagiarismCheck,
     backspaceScore,
     deleteScore,
     totalMarks,
@@ -28,6 +29,7 @@ export default function EssayResults({ analysis }: EssayResultsProps) {
     { name: 'Word Count', score: wordCount.score, maxScore: wordCount.maxScore },
     { name: 'Spelling', score: spellingAccuracy.score, maxScore: spellingAccuracy.maxScore },
     { name: 'Grammar', score: grammarEvaluation.score, maxScore: grammarEvaluation.maxScore },
+    { name: 'Plagiarism Checker', score: plagiarismCheck.score, maxScore: plagiarismCheck.maxScore },
     { name: 'Backspace', score: backspaceScore.score, maxScore: backspaceScore.maxScore },
     { name: 'Delete', score: deleteScore.score, maxScore: deleteScore.maxScore },
   ];
@@ -77,6 +79,11 @@ export default function EssayResults({ analysis }: EssayResultsProps) {
                 {item.name === 'Grammar' && grammarErrors.length > 0 && (
                   <span className="ml-2 text-sm text-red-600">
                     ({grammarErrors.length} errors)
+                  </span>
+                )}
+                {item.name === 'Plagiarism Checker' && (
+                  <span className={`ml-2 text-sm ${plagiarismCheck.isOriginal ? 'text-green-600' : 'text-red-600'}`}>
+                    ({plagiarismCheck.percentage}% {plagiarismCheck.isOriginal ? 'original' : 'similarity detected'})
                   </span>
                 )}
               </div>
@@ -136,15 +143,38 @@ export default function EssayResults({ analysis }: EssayResultsProps) {
       {/* Grammar Errors */}
       {grammarErrors.length > 0 && (
         <div className="bg-white rounded-lg border border-red-200 shadow-sm p-6">
-          <h4 className="text-lg font-semibold text-red-800 mb-4">Grammar Issues Found</h4>
+          <h4 className="text-lg font-semibold text-red-800 mb-4 flex items-center">
+            Grammar Issues Found
+            <span className="ml-2 text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">
+              {grammarErrors.filter(e => e.source).length > 0 ? 'AI Enhanced' : 'Standard'}
+            </span>
+          </h4>
           <div className="space-y-3">
             {grammarErrors.map((error, index) => (
               <div key={index} className="bg-red-50 border border-red-200 rounded-lg p-3">
                 <div className="flex items-start">
                   <span className="text-red-600 mr-2">⚠️</span>
-                  <div>
-                    <p className="font-medium text-red-800">&ldquo;{error.text}&rdquo;</p>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <p className="font-medium text-red-800">&ldquo;{error.text}&rdquo;</p>
+                      {error.source && (
+                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                          error.source === 'LanguageTool' ? 'bg-blue-100 text-blue-600' :
+                          error.source === 'Grammarly-Style' ? 'bg-green-100 text-green-600' :
+                          'bg-gray-100 text-gray-600'
+                        }`}>
+                          {error.source === 'Grammarly-Style' ? '🧠 Grammarly' : 
+                           error.source === 'LanguageTool' ? '🔧 LanguageTool' : 
+                           '📝 Local'}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm text-red-600 mt-1">{error.suggestions[0]}</p>
+                    {error.severity && (
+                      <p className="text-xs text-red-500 mt-1 italic">
+                        Severity: {error.severity}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -179,6 +209,51 @@ export default function EssayResults({ analysis }: EssayResultsProps) {
                     )}
                   </div>
                 </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Plagiarism Details */}
+      {plagiarismCheck.matches && plagiarismCheck.matches.length > 0 && (
+        <div className="bg-white rounded-lg border border-red-200 shadow-sm p-6">
+          <h4 className="text-lg font-semibold text-red-800 mb-4">🔍 Plagiarism Detection Results</h4>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <div className="flex items-center mb-2">
+              <span className="text-red-600 font-semibold">
+                {plagiarismCheck.percentage}% similarity detected
+              </span>
+              <span className={`ml-2 px-2 py-1 rounded text-sm font-medium ${
+                plagiarismCheck.isOriginal 
+                  ? 'bg-green-100 text-green-800' 
+                  : 'bg-red-100 text-red-800'
+              }`}>
+                {plagiarismCheck.isOriginal ? 'ACCEPTABLE' : 'NEEDS REVISION'}
+              </span>
+            </div>
+            <p className="text-sm text-red-700">
+              {plagiarismCheck.isOriginal 
+                ? 'Minor similarity detected but within acceptable limits.' 
+                : 'Significant similarity found. Please revise your content to ensure originality.'}
+            </p>
+          </div>
+          
+          <div className="space-y-3">
+            <h5 className="font-medium text-gray-800">Similar Content Found:</h5>
+            {plagiarismCheck.matches.map((match, index) => (
+              <div key={index} className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                <div className="flex items-start justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-700">Source: {match.source}</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    match.similarity >= 80 ? 'bg-red-100 text-red-700' :
+                    match.similarity >= 50 ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-blue-100 text-blue-700'
+                  }`}>
+                    {match.similarity}% match
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 italic">"{match.text}"</p>
               </div>
             ))}
           </div>
