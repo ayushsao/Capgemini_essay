@@ -20,6 +20,7 @@ export interface EssayAnalysis {
   grammarErrors: GrammarError[];
   suggestions: string[];
   improvementAreas: ImprovementArea[];
+  spellingErrors?: any[]; // Optional spelling errors from API
 }
 
 export interface ImprovementArea {

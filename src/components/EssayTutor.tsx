@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import EssayEditor from './EssayEditor';
 import EssayResults from './EssayResults';
-import { analyzeEssay } from '@/lib/essayAnalysis';
+import { analyzeEssay, analyzeEssayWithAPI } from '@/lib/essayAnalysis';
 import { saveEssay } from '@/lib/essayStorage';
 import { useAuth } from '@/contexts/AuthContext';
 import { EssayAnalysis } from '@/types/essay';
@@ -13,6 +13,7 @@ export default function EssayTutor() {
   const [essay, setEssay] = useState('');
   const [analysis, setAnalysis] = useState<EssayAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [useAPIAnalysis, setUseAPIAnalysis] = useState(true); // Toggle for using API
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
   const [essayTitle, setEssayTitle] = useState('');
@@ -29,25 +30,42 @@ export default function EssayTutor() {
     }
 
     setIsAnalyzing(true);
-    const debounceTimer = setTimeout(() => {
-      const result = analyzeEssay(essay);
-      setAnalysis(result);
+    const debounceTimer = setTimeout(async () => {
+      try {
+        const result = useAPIAnalysis 
+          ? await analyzeEssayWithAPI(essay)
+          : analyzeEssay(essay);
+        setAnalysis(result);
+      } catch (error) {
+        console.warn('API analysis failed, falling back to local analysis:', error);
+        const result = analyzeEssay(essay);
+        setAnalysis(result);
+      }
       setIsAnalyzing(false);
     }, 1000); // 1 second debounce
 
     return () => clearTimeout(debounceTimer);
-  }, [essay, showRealTimeAnalysis, isSubmitted]);
+  }, [essay, showRealTimeAnalysis, isSubmitted, useAPIAnalysis]);
 
-  const handleSubmitEssay = () => {
+  const handleSubmitEssay = async () => {
     if (essay.trim().length < 10) {
       alert('Please write at least 10 words before submitting your essay.');
       return;
     }
 
     setIsAnalyzing(true);
-    const result = analyzeEssay(essay);
-    setAnalysis(result);
-    setIsSubmitted(true);
+    try {
+      const result = useAPIAnalysis 
+        ? await analyzeEssayWithAPI(essay)
+        : analyzeEssay(essay);
+      setAnalysis(result);
+      setIsSubmitted(true);
+    } catch (error) {
+      console.warn('API analysis failed, falling back to local analysis:', error);
+      const result = analyzeEssay(essay);
+      setAnalysis(result);
+      setIsSubmitted(true);
+    }
     setIsAnalyzing(false);
   };
 

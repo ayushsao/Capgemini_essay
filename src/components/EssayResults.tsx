@@ -153,6 +153,38 @@ export default function EssayResults({ analysis }: EssayResultsProps) {
         </div>
       )}
 
+      {/* Spelling Errors from API */}
+      {analysis.spellingErrors && analysis.spellingErrors.length > 0 && (
+        <div className="bg-white rounded-lg border border-yellow-200 shadow-sm p-6">
+          <h4 className="text-lg font-semibold text-yellow-800 mb-4">
+            🔍 Spelling Issues Found (Enhanced Analysis)
+          </h4>
+          <div className="space-y-3">
+            {analysis.spellingErrors.map((error: any, index: number) => (
+              <div key={index} className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <div className="flex items-start">
+                  <span className="text-yellow-600 mr-2">📝</span>
+                  <div className="flex-1">
+                    <p className="font-medium text-yellow-800">
+                      &ldquo;{error.context?.text.substring(error.offset, error.offset + error.length)}&rdquo;
+                    </p>
+                    <p className="text-sm text-yellow-700 mt-1">{error.message}</p>
+                    {error.replacements && error.replacements.length > 0 && (
+                      <div className="mt-2">
+                        <span className="text-xs font-medium text-yellow-800">Suggestions: </span>
+                        <span className="text-xs text-yellow-700">
+                          {error.replacements.map((r: any) => r.value).join(', ')}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Improvement Areas */}
       {improvementAreas && improvementAreas.length > 0 && (
         <div className="bg-white rounded-lg border border-orange-200 shadow-sm p-6">

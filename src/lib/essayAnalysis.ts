@@ -1,3 +1,10 @@
+/*
+ * Capgemini Essay Writing Tutor - Essay Analysis Engine
+ * © 2025 Ayush Kumar Sao. All rights reserved.
+ * 
+ * Enhanced with LanguageTool API integration for comprehensive spelling analysis
+ */
+
 import { EssayAnalysis, GrammarError, ImprovementArea } from '@/types/essay';
 
 // Common misspellings and their corrections - expanded list
@@ -58,7 +65,7 @@ const commonMisspellings: Record<string, string> = {
   'judgement': 'judgment',
   'lenght': 'length',
   'mispelling': 'misspelling',
-  'neccessary': 'necessary',
+  'necessery': 'necessary',
   'occurance': 'occurrence',
   'posession': 'possession',
   'refering': 'referring',
@@ -74,7 +81,6 @@ const commonMisspellings: Record<string, string> = {
   'affect': 'effect', // contextual
   'then': 'than', // contextual
   'alot': 'a lot',
-  'cannot': 'can not', // sometimes
   'everytime': 'every time',
   'inspite': 'in spite',
   'infront': 'in front',
@@ -269,28 +275,26 @@ export function analyzeEssay(text: string): EssayAnalysis {
   // Word Count Evaluation (target: 200-500 words)
   const wordCountScore = calculateWordCountScore(wordCount);
   
-  // Spelling Accuracy Evaluation
+  // Spelling Accuracy Evaluation (using local dictionary as fallback)
   const spellingResults = analyzeSpelling(words);
   
   // Grammar Evaluation
   const grammarResults = analyzeGrammar(text);
   
-  // Calculate typing efficiency based on essay quality and length
+  // Typing Behavior Analysis (placeholder scores)
   const backspaceScore = calculateTypingScore(wordCount, 'backspace');
   const deleteScore = calculateTypingScore(wordCount, 'delete');
   
+  // Calculate total score
   const totalMarks = wordCountScore.score + spellingResults.score + 
                     grammarResults.score + backspaceScore.score + deleteScore.score;
+  const maxTotalMarks = 50;
   
-  // Generate improvement areas
+  // Generate improvement suggestions
+  const suggestions = generateSuggestions(wordCount, spellingResults, grammarResults);
   const improvementAreas = generateImprovementAreas(
-    wordCountScore, 
-    spellingResults, 
-    grammarResults, 
-    backspaceScore, 
-    deleteScore,
-    wordCount,
-    grammarResults.errors || []
+    wordCountScore, spellingResults, grammarResults, 
+    backspaceScore, deleteScore, wordCount, grammarResults.errors || []
   );
   
   return {
@@ -300,10 +304,72 @@ export function analyzeEssay(text: string): EssayAnalysis {
     backspaceScore,
     deleteScore,
     totalMarks,
-    maxTotalMarks: 50,
+    maxTotalMarks,
     grammarErrors: grammarResults.errors || [],
-    suggestions: generateSuggestions(wordCount, spellingResults, grammarResults),
+    suggestions,
     improvementAreas
+  };
+}
+
+// Enhanced version with API-based spelling analysis
+export async function analyzeEssayWithAPI(text: string): Promise<EssayAnalysis> {
+  const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+  const wordCount = words.length;
+  
+  // If no meaningful content, return all zeros
+  if (wordCount === 0 || text.trim().length < 10) {
+    return {
+      wordCount: { score: 0, maxScore: 10 },
+      spellingAccuracy: { score: 0, maxScore: 10 },
+      grammarEvaluation: { score: 0, maxScore: 10 },
+      backspaceScore: { score: 0, maxScore: 10 },
+      deleteScore: { score: 0, maxScore: 10 },
+      totalMarks: 0,
+      maxTotalMarks: 50,
+      grammarErrors: [],
+      suggestions: ['Please write a substantial essay to receive meaningful feedback.'],
+      improvementAreas: [],
+      spellingErrors: []
+    };
+  }
+  
+  // Word Count Evaluation (target: 200-500 words)
+  const wordCountScore = calculateWordCountScore(wordCount);
+  
+  // Enhanced Spelling Accuracy Evaluation using API
+  const spellingResults = await analyzeSpellingWithAPI(text);
+  
+  // Grammar Evaluation
+  const grammarResults = analyzeGrammar(text);
+  
+  // Typing Behavior Analysis (placeholder scores)
+  const backspaceScore = calculateTypingScore(wordCount, 'backspace');
+  const deleteScore = calculateTypingScore(wordCount, 'delete');
+  
+  // Calculate total score
+  const totalMarks = wordCountScore.score + spellingResults.score + 
+                    grammarResults.score + backspaceScore.score + deleteScore.score;
+  const maxTotalMarks = 50;
+  
+  // Generate improvement suggestions
+  const suggestions = generateSuggestions(wordCount, spellingResults, grammarResults);
+  const improvementAreas = generateImprovementAreas(
+    wordCountScore, spellingResults, grammarResults, 
+    backspaceScore, deleteScore, wordCount, grammarResults.errors || []
+  );
+  
+  return {
+    wordCount: wordCountScore,
+    spellingAccuracy: spellingResults,
+    grammarEvaluation: grammarResults,
+    backspaceScore,
+    deleteScore,
+    totalMarks,
+    maxTotalMarks,
+    grammarErrors: grammarResults.errors || [],
+    suggestions,
+    improvementAreas,
+    spellingErrors: spellingResults.errors || []
   };
 }
 
@@ -361,6 +427,149 @@ function calculateTypingScore(wordCount: number, type: 'backspace' | 'delete'): 
   } else {
     return { score: 9, maxScore }; // Very high score for comprehensive content
   }
+}
+
+// Enhanced spelling analysis using LanguageTool API
+async function analyzeSpellingWithAPI(text: string): Promise<{ score: number; maxScore: number; errors: any[] }> {
+  const maxScore = 10;
+  
+  // Need sufficient content to properly evaluate spelling
+  if (text.trim().length < 10) {
+    return { score: 0, maxScore, errors: [] };
+  }
+
+  try {
+    // Use LanguageTool free API for comprehensive spelling check
+    const response = await fetch('https://api.languagetool.org/v2/check', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        text: text,
+        language: 'en-US',
+        enabledOnly: 'false',
+        // Focus on spelling errors
+        enabledCategories: 'TYPOS,CONFUSED_WORDS,SPELLING',
+        disabledCategories: 'PUNCTUATION,GRAMMAR,STYLE,COLLOQUIALISMS'
+      })
+    });
+
+    if (!response.ok) {
+      console.warn('LanguageTool API request failed, falling back to local dictionary');
+      return analyzeSpellingLocal(text.split(/\s+/));
+    }
+
+    const data = await response.json();
+    const spellingErrors = data.matches.filter((match: any) => 
+      match.rule.category.id === 'TYPOS' || 
+      match.rule.category.id === 'CONFUSED_WORDS' || 
+      match.rule.category.id === 'SPELLING'
+    );
+
+    // Calculate score based on error density
+    const wordCount = text.trim().split(/\s+/).length;
+    const errorRate = spellingErrors.length / Math.max(wordCount, 1);
+    
+    let score = maxScore;
+    
+    if (spellingErrors.length === 0) {
+      score = maxScore; // Perfect spelling
+    } else {
+      // More strict scoring based on error density
+      if (errorRate >= 0.15) score = 1; // 15%+ errors = very poor
+      else if (errorRate >= 0.1) score = 2; // 10-14% errors = poor
+      else if (errorRate >= 0.08) score = 3; // 8-9% errors = below average
+      else if (errorRate >= 0.06) score = 4; // 6-7% errors = fair
+      else if (errorRate >= 0.04) score = 5; // 4-5% errors = okay
+      else if (errorRate >= 0.03) score = 6; // 3% errors = good
+      else if (errorRate >= 0.02) score = 7; // 2% errors = very good
+      else if (errorRate >= 0.01) score = 8; // 1% errors = excellent
+      else score = 9; // <1% errors = nearly perfect
+    }
+
+    // Adjust score based on content length
+    if (wordCount < 15) {
+      score = Math.min(score, 4); // Cap score for very short content
+    } else if (wordCount < 30) {
+      score = Math.min(score, 7); // Cap score for short content
+    }
+
+    // Bonus for longer essays with excellent spelling
+    if (wordCount >= 100 && spellingErrors.length === 0) {
+      score = maxScore;
+    }
+
+    return { 
+      score: Math.max(0, Math.min(maxScore, Math.round(score))), 
+      maxScore, 
+      errors: spellingErrors 
+    };
+
+  } catch (error) {
+    console.warn('Error with LanguageTool API, falling back to local dictionary:', error);
+    return analyzeSpellingLocal(text.split(/\s+/));
+  }
+}
+
+// Fallback local spelling analysis (original function)
+function analyzeSpellingLocal(words: string[]): { score: number; maxScore: number; errors: any[] } {
+  const maxScore = 10;
+  let misspelledCount = 0;
+  let totalValidWords = 0;
+  const errors: any[] = [];
+  
+  // Need sufficient content to properly evaluate spelling
+  if (words.length < 5) {
+    return { score: 0, maxScore, errors: [] };
+  }
+  
+  words.forEach((word, index) => {
+    const cleanWord = word.toLowerCase().replace(/[^a-z]/g, '');
+    if (cleanWord.length > 2) {
+      totalValidWords++;
+      if (commonMisspellings[cleanWord]) {
+        misspelledCount++;
+        errors.push({
+          message: `Possible spelling error: "${word}"`,
+          offset: 0,
+          length: word.length,
+          replacements: [{ value: commonMisspellings[cleanWord] }],
+          rule: { category: { id: 'TYPOS' } }
+        });
+      }
+    }
+  });
+  
+  if (totalValidWords === 0) return { score: 0, maxScore, errors: [] };
+  
+  let score = 0;
+  
+  if (misspelledCount === 0) {
+    score = maxScore;
+  } else {
+    const errorRate = misspelledCount / totalValidWords;
+    
+    if (errorRate >= 0.3) score = 1;
+    else if (errorRate >= 0.2) score = 3;
+    else if (errorRate >= 0.15) score = 4;
+    else if (errorRate >= 0.1) score = 5;
+    else if (errorRate >= 0.08) score = 6;
+    else if (errorRate >= 0.05) score = 7;
+    else if (errorRate >= 0.03) score = 8;
+    else score = 9;
+  }
+  
+  // Adjust score based on content length
+  if (words.length < 15) {
+    score = Math.min(score, 3);
+  } else if (words.length < 30) {
+    score = Math.min(score, 6);
+  } else if (words.length < 50) {
+    score = Math.min(score, 8);
+  }
+  
+  return { score: Math.max(0, Math.min(maxScore, Math.round(score))), maxScore, errors };
 }
 
 function analyzeSpelling(words: string[]): { score: number; maxScore: number } {

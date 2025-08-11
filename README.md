@@ -1,5 +1,7 @@
 # Capgemini Essay Writing Tutor
 
+**© 2025 Ayush Kumar Sao. All rights reserved.**
+
 A comprehensive essay analysis and writing improvement platform built with Next.js, TypeScript, and Tailwind CSS.
 
 ## Features
@@ -148,3 +150,26 @@ To learn more about the technologies used:
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+---
+
+## License & Copyright
+
+**© 2025 Ayush Kumar Sao. All rights reserved.**
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+### Author
+- **Ayush Kumar Sao** - *Project Creator & Developer*
+  - Enhanced the application with comprehensive LanguageTool API integration
+  - Implemented advanced spelling analysis and error detection
+  - Created real-time essay evaluation system
+
+### Acknowledgments
+- Built with Next.js, TypeScript, and Tailwind CSS
+- Enhanced spelling analysis powered by [LanguageTool API](https://languagetool.org/)
+- Comprehensive essay evaluation with real-time feedback
+
+For more information about the enhanced spelling features, see [SPELLING_ENHANCEMENT.md](SPELLING_ENHANCEMENT.md)
+
+**Capgemini Essay Writing Tutor** - Empowering students with intelligent essay analysis and feedback.
