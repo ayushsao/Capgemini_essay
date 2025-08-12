@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { addFeedback } from '@/lib/feedbackServices';
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -21,11 +22,9 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
 
     setIsSubmitting(true);
     
-    // Simulate submission (you can integrate with your backend here)
     try {
-      // Save to localStorage for now
+      // Create feedback data
       const feedbackData = {
-        id: Date.now().toString(),
         feedback,
         email,
         rating,
@@ -34,12 +33,17 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
         status: 'new' as const
       };
       
+      console.log('💾 Saving feedback to Firebase:', feedbackData);
+      
+      // Save to Firebase
+      const feedbackId = await addFeedback(feedbackData);
+      console.log('✅ Feedback saved to Firebase with ID:', feedbackId);
+      
+      // Also save to localStorage as backup
       const existingFeedbacks = localStorage.getItem('essaypolish_feedbacks');
       const feedbacks = existingFeedbacks ? JSON.parse(existingFeedbacks) : [];
-      feedbacks.unshift(feedbackData); // Add to beginning of array
+      feedbacks.unshift({ id: feedbackId, ...feedbackData });
       localStorage.setItem('essaypolish_feedbacks', JSON.stringify(feedbacks));
-      
-      console.log('Feedback submitted:', feedbackData);
       
       setSubmitted(true);
       setTimeout(() => {
@@ -51,7 +55,38 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
         setCategory('general');
       }, 2000);
     } catch (error) {
-      console.error('Error submitting feedback:', error);
+      console.error('� Error submitting feedback:', error);
+      
+      // Fallback to localStorage if Firebase fails
+      try {
+        const feedbackData = {
+          id: Date.now().toString(),
+          feedback,
+          email,
+          rating,
+          category,
+          timestamp: new Date().toISOString(),
+          status: 'new' as const
+        };
+        
+        const existingFeedbacks = localStorage.getItem('essaypolish_feedbacks');
+        const feedbacks = existingFeedbacks ? JSON.parse(existingFeedbacks) : [];
+        feedbacks.unshift(feedbackData);
+        localStorage.setItem('essaypolish_feedbacks', JSON.stringify(feedbacks));
+        
+        console.log('⚠️ Saved to localStorage as fallback');
+        setSubmitted(true);
+        setTimeout(() => {
+          onClose();
+          setSubmitted(false);
+          setFeedback('');
+          setEmail('');
+          setRating(0);
+          setCategory('general');
+        }, 2000);
+      } catch (fallbackError) {
+        console.error('💥 Fallback to localStorage also failed:', fallbackError);
+      }
     } finally {
       setIsSubmitting(false);
     }

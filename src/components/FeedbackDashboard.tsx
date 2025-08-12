@@ -1,60 +1,84 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-
-interface FeedbackItem {
-  id: string;
-  feedback: string;
-  email?: string;
-  rating: number;
-  category: string;
-  timestamp: string;
-  status: 'new' | 'reviewed' | 'resolved';
-}
+import { getFeedbacks, updateFeedbackStatus, deleteFeedback, addFeedback, FeedbackData } from '@/lib/feedbackServices';
 
 export default function FeedbackDashboard() {
-  const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
+  const [feedbacks, setFeedbacks] = useState<FeedbackData[]>([]);
   const [filter, setFilter] = useState<'all' | 'new' | 'reviewed' | 'resolved'>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [loading, setLoading] = useState(false);
 
-  // Load feedback from localStorage (temporary storage)
+  // Load feedback from Firebase
   useEffect(() => {
-    const savedFeedbacks = localStorage.getItem('essaypolish_feedbacks');
-    console.log('🔍 Loading feedbacks from localStorage:', savedFeedbacks);
-    
-    if (savedFeedbacks) {
-      try {
-        const parsedFeedbacks = JSON.parse(savedFeedbacks);
-        console.log('✅ Parsed feedbacks:', parsedFeedbacks);
-        setFeedbacks(parsedFeedbacks);
-      } catch (error) {
-        console.error('❌ Error parsing feedbacks:', error);
-        setFeedbacks([]);
-      }
-    } else {
-      console.log('ℹ️ No feedbacks found in localStorage');
-      setFeedbacks([]);
-    }
+    loadFeedbacks();
   }, []);
 
-  const updateFeedbackStatus = (id: string, status: 'new' | 'reviewed' | 'resolved') => {
-    const updatedFeedbacks = feedbacks.map(item => 
-      item.id === id ? { ...item, status } : item
-    );
-    setFeedbacks(updatedFeedbacks);
-    localStorage.setItem('essaypolish_feedbacks', JSON.stringify(updatedFeedbacks));
+  const loadFeedbacks = async () => {
+    setLoading(true);
+    try {
+      console.log('🔍 Loading feedbacks from Firebase...');
+      const firebaseFeedbacks = await getFeedbacks();
+      setFeedbacks(firebaseFeedbacks);
+      console.log('✅ Loaded feedbacks from Firebase:', firebaseFeedbacks);
+    } catch (error) {
+      console.error('❌ Error loading from Firebase, falling back to localStorage:', error);
+      
+      // Fallback to localStorage
+      const savedFeedbacks = localStorage.getItem('essaypolish_feedbacks');
+      if (savedFeedbacks) {
+        try {
+          const parsedFeedbacks = JSON.parse(savedFeedbacks);
+          console.log('✅ Loaded feedbacks from localStorage:', parsedFeedbacks);
+          setFeedbacks(parsedFeedbacks);
+        } catch (parseError) {
+          console.error('❌ Error parsing localStorage feedback:', parseError);
+          setFeedbacks([]);
+        }
+      } else {
+        console.log('ℹ️ No feedbacks found');
+        setFeedbacks([]);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const deleteFeedback = (id: string) => {
-    const updatedFeedbacks = feedbacks.filter(item => item.id !== id);
-    setFeedbacks(updatedFeedbacks);
-    localStorage.setItem('essaypolish_feedbacks', JSON.stringify(updatedFeedbacks));
+  const updateStatus = async (id: string, status: 'new' | 'reviewed' | 'resolved') => {
+    try {
+      await updateFeedbackStatus(id, status);
+      setFeedbacks(prev => prev.map(item => 
+        item.id === id ? { ...item, status } : item
+      ));
+      console.log('✅ Status updated in Firebase');
+    } catch (error) {
+      console.error('❌ Error updating status:', error);
+      // Fallback to localStorage update
+      const updatedFeedbacks = feedbacks.map(item => 
+        item.id === id ? { ...item, status } : item
+      );
+      setFeedbacks(updatedFeedbacks);
+      localStorage.setItem('essaypolish_feedbacks', JSON.stringify(updatedFeedbacks));
+    }
+  };
+
+  const deleteFeedbackItem = async (id: string) => {
+    try {
+      await deleteFeedback(id);
+      setFeedbacks(prev => prev.filter(item => item.id !== id));
+      console.log('✅ Feedback deleted from Firebase');
+    } catch (error) {
+      console.error('❌ Error deleting from Firebase:', error);
+      // Fallback to localStorage delete
+      const updatedFeedbacks = feedbacks.filter(item => item.id !== id);
+      setFeedbacks(updatedFeedbacks);
+      localStorage.setItem('essaypolish_feedbacks', JSON.stringify(updatedFeedbacks));
+    }
   };
 
   // Add test feedback for debugging
-  const addTestFeedback = () => {
-    const testFeedback: FeedbackItem = {
-      id: Date.now().toString(),
+  const addTestFeedback = async () => {
+    const testFeedback: FeedbackData = {
       feedback: 'This is a test feedback to verify the system is working!',
       email: 'test@example.com',
       rating: 5,
@@ -63,18 +87,32 @@ export default function FeedbackDashboard() {
       status: 'new'
     };
     
-    const updatedFeedbacks = [testFeedback, ...feedbacks];
-    setFeedbacks(updatedFeedbacks);
-    localStorage.setItem('essaypolish_feedbacks', JSON.stringify(updatedFeedbacks));
-    console.log('✅ Test feedback added:', testFeedback);
+    try {
+      const feedbackId = await addFeedback(testFeedback);
+      setFeedbacks(prev => [{ id: feedbackId, ...testFeedback }, ...prev]);
+      console.log('✅ Test feedback added to Firebase:', { id: feedbackId, ...testFeedback });
+    } catch (error) {
+      console.error('❌ Error adding test feedback to Firebase:', error);
+      // Fallback to localStorage
+      const testWithId = { id: Date.now().toString(), ...testFeedback };
+      setFeedbacks(prev => [testWithId, ...prev]);
+      const updated = [testWithId, ...feedbacks];
+      localStorage.setItem('essaypolish_feedbacks', JSON.stringify(updated));
+      console.log('⚠️ Test feedback added to localStorage as fallback');
+    }
   };
 
-  // Refresh feedbacks from localStorage
+  // Refresh feedbacks from Firebase
   const refreshFeedbacks = () => {
-    const savedFeedbacks = localStorage.getItem('essaypolish_feedbacks');
-    console.log('🔄 Refreshing feedbacks:', savedFeedbacks);
-    if (savedFeedbacks) {
-      setFeedbacks(JSON.parse(savedFeedbacks));
+    loadFeedbacks();
+  };
+
+  // Clear all feedback for testing
+  const clearAllFeedback = () => {
+    if (confirm('Are you sure you want to delete ALL feedback? This cannot be undone.')) {
+      localStorage.removeItem('essaypolish_feedbacks');
+      setFeedbacks([]);
+      console.log('🗑️ All feedback cleared');
     }
   };
 
@@ -126,6 +164,12 @@ export default function FeedbackDashboard() {
               className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
               ➕ Add Test
+            </button>
+            <button
+              onClick={clearAllFeedback}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              🗑️ Clear All
             </button>
           </div>
         </div>
@@ -254,7 +298,7 @@ export default function FeedbackDashboard() {
               <div className="flex space-x-2">
                 <select
                   value={item.status}
-                  onChange={(e) => updateFeedbackStatus(item.id, e.target.value as any)}
+                  onChange={(e) => item.id && updateStatus(item.id, e.target.value as any)}
                   className="px-3 py-1 text-xs border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="new">New</option>
@@ -262,7 +306,7 @@ export default function FeedbackDashboard() {
                   <option value="resolved">Resolved</option>
                 </select>
                 <button
-                  onClick={() => deleteFeedback(item.id)}
+                  onClick={() => item.id && deleteFeedbackItem(item.id)}
                   className="px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
                 >
                   Delete
