@@ -26,11 +26,22 @@ export interface PlagiarismMatch {
   position: number;
 }
 
+export interface AIDetectionResult {
+  isAIGenerated: boolean;
+  confidence: number;
+  score: number;
+  maxScore: number;
+  reasons: string[];
+  detectedPatterns: string[];
+  recommendations: string[];
+}
+
 export interface EssayAnalysis {
   wordCount: EssayScore;
   spellingAccuracy: EssayScore;
   grammarEvaluation: EssayScore;
   plagiarismCheck: PlagiarismResult;
+  aiDetection?: AIDetectionResult; // Make optional for backward compatibility
   backspaceScore: EssayScore;
   deleteScore: EssayScore;
   totalMarks: number;
@@ -42,7 +53,7 @@ export interface EssayAnalysis {
 }
 
 export interface ImprovementArea {
-  category: 'Word Count' | 'Spelling' | 'Grammar' | 'Structure' | 'Content Quality' | 'Typing Efficiency';
+  category: 'Word Count' | 'Spelling' | 'Grammar' | 'Structure' | 'Content Quality' | 'Typing Efficiency' | 'AI Detection';
   priority: 'high' | 'medium' | 'low';
   description: string;
   tips: string[];

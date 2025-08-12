@@ -2,10 +2,11 @@
  * Capgemini Essay Writing Tutor - Essay Analysis Engine
  * © 2025 Ayush Kumar Sao. All rights reserved.
  * 
- * Enhanced with LanguageTool API integration for comprehensive spelling analysis
+ * Enhanced with LanguageTool API integration and AI content detection
  */
 
 import { EssayAnalysis, GrammarError, ImprovementArea, PlagiarismResult, PlagiarismMatch } from '@/types/essay';
+import { detectAIContent } from './aiDetection';
 
 // Common misspellings and their corrections - expanded list
 const commonMisspellings: Record<string, string> = {
@@ -375,6 +376,7 @@ export function analyzeEssay(text: string): EssayAnalysis {
       spellingAccuracy: { score: 0, maxScore: 10 },
       grammarEvaluation: { score: 0, maxScore: 10 },
       plagiarismCheck: { score: 0, maxScore: 10, percentage: 0, isOriginal: true },
+      aiDetection: { score: 10, maxScore: 10, isAIGenerated: false, confidence: 0, reasons: [], detectedPatterns: [], recommendations: [] },
       backspaceScore: { score: 0, maxScore: 10 },
       deleteScore: { score: 0, maxScore: 10 },
       totalMarks: 0,
@@ -418,6 +420,7 @@ export function analyzeEssay(text: string): EssayAnalysis {
     spellingAccuracy: spellingResults,
     grammarEvaluation: grammarResults,
     plagiarismCheck: plagiarismResults,
+    aiDetection: { score: 10, maxScore: 10, isAIGenerated: false, confidence: 0, reasons: [], detectedPatterns: [], recommendations: [] },
     backspaceScore,
     deleteScore,
     totalMarks,
@@ -440,6 +443,7 @@ export async function analyzeEssayWithAPI(text: string): Promise<EssayAnalysis> 
       spellingAccuracy: { score: 0, maxScore: 10 },
       grammarEvaluation: { score: 0, maxScore: 10 },
       plagiarismCheck: { score: 0, maxScore: 10, percentage: 0, isOriginal: true },
+      aiDetection: { score: 10, maxScore: 10, isAIGenerated: false, confidence: 0, reasons: [], detectedPatterns: [], recommendations: [] },
       backspaceScore: { score: 0, maxScore: 10 },
       deleteScore: { score: 0, maxScore: 10 },
       totalMarks: 0,
@@ -484,6 +488,7 @@ export async function analyzeEssayWithAPI(text: string): Promise<EssayAnalysis> 
     spellingAccuracy: spellingResults,
     grammarEvaluation: grammarResults,
     plagiarismCheck: plagiarismResults,
+    aiDetection: { score: 10, maxScore: 10, isAIGenerated: false, confidence: 0, reasons: [], detectedPatterns: [], recommendations: [] },
     backspaceScore,
     deleteScore,
     totalMarks,
@@ -767,6 +772,7 @@ export async function analyzeEssayWithAdvancedGrammar(text: string, useAdvancedG
       spellingAccuracy: { score: 0, maxScore: 10 },
       grammarEvaluation: { score: 0, maxScore: 10 },
       plagiarismCheck: { score: 0, maxScore: 10, percentage: 0, isOriginal: true },
+      aiDetection: { score: 10, maxScore: 10, isAIGenerated: false, confidence: 0, reasons: [], detectedPatterns: [], recommendations: [] },
       backspaceScore: { score: 0, maxScore: 10 },
       deleteScore: { score: 0, maxScore: 10 },
       totalMarks: 0,
@@ -792,6 +798,10 @@ export async function analyzeEssayWithAdvancedGrammar(text: string, useAdvancedG
   // Plagiarism Check
   const plagiarismResults = detectPlagiarism(text);
   
+  // AI Content Detection
+  const aiDetectionResult = detectAIContent(text);
+  const aiScore = calculateAIDetectionScore(aiDetectionResult);
+  
   // Typing Behavior Analysis (placeholder scores)
   const backspaceScore = calculateTypingScore(wordCount, 'backspace');
   const deleteScore = calculateTypingScore(wordCount, 'delete');
@@ -813,6 +823,7 @@ export async function analyzeEssayWithAdvancedGrammar(text: string, useAdvancedG
     spellingAccuracy: spellingResults,
     grammarEvaluation: grammarResults,
     plagiarismCheck: plagiarismResults,
+    aiDetection: aiScore,
     backspaceScore,
     deleteScore,
     totalMarks,
@@ -821,6 +832,39 @@ export async function analyzeEssayWithAdvancedGrammar(text: string, useAdvancedG
     suggestions,
     improvementAreas,
     spellingErrors: spellingResults.errors || []
+  };
+}
+
+// AI Detection Score Calculation
+function calculateAIDetectionScore(result: any): any {
+  const maxScore = 10;
+  
+  // Higher confidence in AI detection = lower score (penalty)
+  // 0-20% confidence = full points (10/10)
+  // 21-40% confidence = 8 points
+  // 41-60% confidence = 6 points  
+  // 61-80% confidence = 4 points
+  // 81-100% confidence = 2 points
+  
+  let score = maxScore;
+  if (result.confidence > 80) {
+    score = 2;
+  } else if (result.confidence > 60) {
+    score = 4;
+  } else if (result.confidence > 40) {
+    score = 6;
+  } else if (result.confidence > 20) {
+    score = 8;
+  }
+  
+  return {
+    score,
+    maxScore,
+    isAIGenerated: result.isAIGenerated,
+    confidence: result.confidence,
+    reasons: result.reasons,
+    detectedPatterns: result.detectedPatterns,
+    recommendations: result.recommendations
   };
 }
 async function analyzeGrammarWithAPIs(text: string): Promise<{ score: number; maxScore: number; errors?: GrammarError[] }> {

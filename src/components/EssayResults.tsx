@@ -8,30 +8,46 @@ interface EssayResultsProps {
   isSubmitted?: boolean;
 }
 
-const COLORS = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#06B6D4'];
+const COLORS = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#06B6D4', '#EC4899'];
 
 export default function EssayResults({ analysis }: EssayResultsProps) {
+  // Provide comprehensive defaults for missing properties
+  const defaultAIDetection = { 
+    score: 10, 
+    maxScore: 10, 
+    isAIGenerated: false, 
+    confidence: 0, 
+    reasons: [], 
+    detectedPatterns: [], 
+    recommendations: [] 
+  };
+
+  const defaultScore = { score: 0, maxScore: 10 };
+  const defaultPlagiarism = { score: 10, maxScore: 10, percentage: 0, isOriginal: true, matches: [] };
+
   const {
-    wordCount,
-    spellingAccuracy,
-    grammarEvaluation,
-    plagiarismCheck,
-    backspaceScore,
-    deleteScore,
-    totalMarks,
-    maxTotalMarks,
-    grammarErrors,
-    suggestions,
-    improvementAreas
-  } = analysis;
+    wordCount = defaultScore,
+    spellingAccuracy = defaultScore,
+    grammarEvaluation = defaultScore,
+    plagiarismCheck = defaultPlagiarism,
+    aiDetection = defaultAIDetection,
+    backspaceScore = defaultScore,
+    deleteScore = defaultScore,
+    totalMarks = 0,
+    maxTotalMarks = 70,
+    grammarErrors = [],
+    suggestions = [],
+    improvementAreas = []
+  } = analysis || {};
 
   const chartData = [
-    { name: 'Word Count', score: wordCount.score, maxScore: wordCount.maxScore },
-    { name: 'Spelling', score: spellingAccuracy.score, maxScore: spellingAccuracy.maxScore },
-    { name: 'Grammar', score: grammarEvaluation.score, maxScore: grammarEvaluation.maxScore },
-    { name: 'Plagiarism Checker', score: plagiarismCheck.score, maxScore: plagiarismCheck.maxScore },
-    { name: 'Backspace', score: backspaceScore.score, maxScore: backspaceScore.maxScore },
-    { name: 'Delete', score: deleteScore.score, maxScore: deleteScore.maxScore },
+    { name: 'Word Count', score: wordCount?.score || 0, maxScore: wordCount?.maxScore || 10 },
+    { name: 'Spelling', score: spellingAccuracy?.score || 0, maxScore: spellingAccuracy?.maxScore || 10 },
+    { name: 'Grammar', score: grammarEvaluation?.score || 0, maxScore: grammarEvaluation?.maxScore || 10 },
+    { name: 'Plagiarism Checker', score: plagiarismCheck?.score || 0, maxScore: plagiarismCheck?.maxScore || 10 },
+    { name: 'AI Detection', score: aiDetection?.score || 10, maxScore: aiDetection?.maxScore || 10 },
+    { name: 'Backspace', score: backspaceScore?.score || 0, maxScore: backspaceScore?.maxScore || 10 },
+    { name: 'Delete', score: deleteScore?.score || 0, maxScore: deleteScore?.maxScore || 10 },
   ];
 
   const pieData = chartData.map((item, index) => ({
@@ -259,6 +275,61 @@ export default function EssayResults({ analysis }: EssayResultsProps) {
           </div>
         </div>
       )}
+
+      {/* AI Detection Results */}
+      <div className="bg-white rounded-lg border border-purple-200 shadow-sm p-6">
+        <h4 className="text-lg font-semibold text-purple-800 mb-4">🤖 AI Content Detection</h4>
+        <div className={`border rounded-lg p-4 mb-4 ${
+          aiDetection?.isAIGenerated 
+            ? 'border-red-200 bg-red-50' 
+            : 'border-green-200 bg-green-50'
+        }`}>
+          <div className="flex items-center mb-2">
+            <span className={`font-semibold ${
+              aiDetection?.isAIGenerated ? 'text-red-600' : 'text-green-600'
+            }`}>
+              {aiDetection?.confidence || 0}% AI confidence
+            </span>
+            <span className={`ml-2 px-2 py-1 rounded text-sm font-medium ${
+              aiDetection?.isAIGenerated 
+                ? 'bg-red-100 text-red-800' 
+                : 'bg-green-100 text-green-800'
+            }`}>
+              {aiDetection?.isAIGenerated ? 'AI DETECTED' : 'HUMAN WRITTEN'}
+            </span>
+          </div>
+          <p className={`text-sm ${
+            aiDetection?.isAIGenerated ? 'text-red-700' : 'text-green-700'
+          }`}>
+            {aiDetection?.isAIGenerated 
+              ? 'This content shows characteristics of AI generation. Please review and ensure originality.' 
+              : 'This content appears to be human-written with natural patterns.'}
+          </p>
+        </div>
+        
+        {aiDetection?.detectedPatterns && aiDetection.detectedPatterns.length > 0 && (
+          <div className="space-y-3 mb-4">
+            <h5 className="font-medium text-gray-800">Detected AI Patterns:</h5>
+            {aiDetection.detectedPatterns.map((pattern, index) => (
+              <div key={index} className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                <p className="text-sm text-gray-700">{pattern}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {aiDetection?.recommendations && aiDetection.recommendations.length > 0 && (
+          <div className="space-y-2">
+            <h5 className="font-medium text-gray-800">Recommendations:</h5>
+            {aiDetection.recommendations.map((recommendation, index) => (
+              <div key={index} className="flex items-start text-sm text-gray-700">
+                <span className="text-blue-500 mr-2 mt-0.5">•</span>
+                <span>{recommendation}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Improvement Areas */}
       {improvementAreas && improvementAreas.length > 0 && (
