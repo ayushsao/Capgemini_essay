@@ -116,6 +116,19 @@ export default function FeedbackDashboard() {
     }
   };
 
+  // Test Firebase connection
+  const testFirebaseConnection = async () => {
+    console.log('🔥 Testing Firebase connection...');
+    try {
+      // Try to read from Firebase
+      await getFeedbacks();
+      alert('✅ Firebase connection successful! Check console for details.');
+    } catch (error) {
+      console.error('❌ Firebase connection failed:', error);
+      alert('❌ Firebase connection failed. Check console for details.');
+    }
+  };
+
   const filteredFeedbacks = feedbacks.filter(item => {
     const statusMatch = filter === 'all' || item.status === filter;
     const categoryMatch = selectedCategory === 'all' || item.category === selectedCategory;
@@ -164,6 +177,12 @@ export default function FeedbackDashboard() {
               className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
               ➕ Add Test
+            </button>
+            <button
+              onClick={testFirebaseConnection}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              🔥 Test Firebase
             </button>
             <button
               onClick={clearAllFeedback}
