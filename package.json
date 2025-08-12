@@ -2,7 +2,7 @@
   "name": "virtual-tutor",
   "version": "0.1.0",
   "author": "Ayush Kumar Sao",
-  "description": "EssayPolish - A comprehensive essay analysis and writing improvement platform powered by AI",
+  "description": "Essaytude - A comprehensive essay analysis and writing improvement platform powered by AI",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -15,6 +15,7 @@
     "@tailwindcss/typography": "^0.5.16",
     "compromise": "^14.14.4",
     "firebase": "^12.0.0",
+    "lucide-react": "^0.539.0",
     "natural": "^8.1.0",
     "next": "15.4.5",
     "react": "19.1.0",

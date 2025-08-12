@@ -40,10 +40,10 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
       console.log('✅ Feedback saved to Firebase with ID:', feedbackId);
       
       // Also save to localStorage as backup
-      const existingFeedbacks = localStorage.getItem('essaypolish_feedbacks');
+      const existingFeedbacks = localStorage.getItem('essaytude_feedbacks');
       const feedbacks = existingFeedbacks ? JSON.parse(existingFeedbacks) : [];
       feedbacks.unshift({ id: feedbackId, ...feedbackData });
-      localStorage.setItem('essaypolish_feedbacks', JSON.stringify(feedbacks));
+      localStorage.setItem('essaytude_feedbacks', JSON.stringify(feedbacks));
       
       setSubmitted(true);
       setTimeout(() => {
@@ -69,10 +69,10 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
           status: 'new' as const
         };
         
-        const existingFeedbacks = localStorage.getItem('essaypolish_feedbacks');
+        const existingFeedbacks = localStorage.getItem('essaytude_feedbacks');
         const feedbacks = existingFeedbacks ? JSON.parse(existingFeedbacks) : [];
         feedbacks.unshift(feedbackData);
-        localStorage.setItem('essaypolish_feedbacks', JSON.stringify(feedbacks));
+        localStorage.setItem('essaytude_feedbacks', JSON.stringify(feedbacks));
         
         console.log('⚠️ Saved to localStorage as fallback');
         setSubmitted(true);
@@ -112,7 +112,7 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
             <h2 className="text-xl font-bold text-gray-900">Share Your Feedback</h2>
-            <p className="text-sm text-gray-600 mt-1">Help us improve EssayPolish</p>
+            <p className="text-sm text-gray-600 mt-1">Help us improve Essaytude</p>
           </div>
           <button
             onClick={handleClose}
@@ -204,7 +204,7 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                 onChange={(e) => setFeedback(e.target.value)}
                 rows={4}
                 required
-                placeholder="Tell us what you think about EssayPolish..."
+                placeholder="Tell us what you think about Essaytude..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
               />
             </div>

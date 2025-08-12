@@ -25,7 +25,7 @@ export default function FeedbackDashboard() {
       console.error('❌ Error loading from Firebase, falling back to localStorage:', error);
       
       // Fallback to localStorage
-      const savedFeedbacks = localStorage.getItem('essaypolish_feedbacks');
+      const savedFeedbacks = localStorage.getItem('essaytude_feedbacks');
       if (savedFeedbacks) {
         try {
           const parsedFeedbacks = JSON.parse(savedFeedbacks);
@@ -58,7 +58,7 @@ export default function FeedbackDashboard() {
         item.id === id ? { ...item, status } : item
       );
       setFeedbacks(updatedFeedbacks);
-      localStorage.setItem('essaypolish_feedbacks', JSON.stringify(updatedFeedbacks));
+      localStorage.setItem('essaytude_feedbacks', JSON.stringify(updatedFeedbacks));
     }
   };
 
@@ -72,7 +72,7 @@ export default function FeedbackDashboard() {
       // Fallback to localStorage delete
       const updatedFeedbacks = feedbacks.filter(item => item.id !== id);
       setFeedbacks(updatedFeedbacks);
-      localStorage.setItem('essaypolish_feedbacks', JSON.stringify(updatedFeedbacks));
+      localStorage.setItem('essaytude_feedbacks', JSON.stringify(updatedFeedbacks));
     }
   };
 
@@ -97,7 +97,7 @@ export default function FeedbackDashboard() {
       const testWithId = { id: Date.now().toString(), ...testFeedback };
       setFeedbacks(prev => [testWithId, ...prev]);
       const updated = [testWithId, ...feedbacks];
-      localStorage.setItem('essaypolish_feedbacks', JSON.stringify(updated));
+      localStorage.setItem('writers_choice_feedbacks', JSON.stringify(updated));
       console.log('⚠️ Test feedback added to localStorage as fallback');
     }
   };
@@ -110,7 +110,7 @@ export default function FeedbackDashboard() {
   // Clear all feedback for testing
   const clearAllFeedback = () => {
     if (confirm('Are you sure you want to delete ALL feedback? This cannot be undone.')) {
-      localStorage.removeItem('essaypolish_feedbacks');
+      localStorage.removeItem('writers_choice_feedbacks');
       setFeedbacks([]);
       console.log('🗑️ All feedback cleared');
     }
@@ -163,7 +163,7 @@ export default function FeedbackDashboard() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Feedback Management</h1>
-            <p className="text-gray-600">Manage and respond to user feedback for EssayPolish</p>
+            <p className="text-gray-600">Manage and respond to user feedback for Essaytude</p>
           </div>
           <div className="flex space-x-2">
             <button
@@ -262,11 +262,11 @@ export default function FeedbackDashboard() {
             <p><strong>Filtered feedbacks:</strong> {filteredFeedbacks.length}</p>
             <p><strong>Current filter:</strong> {filter}</p>
             <p><strong>Current category:</strong> {selectedCategory}</p>
-            <p><strong>localStorage key:</strong> essaypolish_feedbacks</p>
+            <p><strong>localStorage key:</strong> writers_choice_feedbacks</p>
             <div className="mt-2">
               <strong>Raw localStorage data:</strong>
               <pre className="bg-white p-2 rounded border text-xs overflow-auto max-h-32">
-                {localStorage.getItem('essaypolish_feedbacks') || 'No data found'}
+                {localStorage.getItem('writers_choice_feedbacks') || 'No data found'}
               </pre>
             </div>
           </div>
@@ -332,7 +332,7 @@ export default function FeedbackDashboard() {
                 </button>
                 {item.email && (
                   <a
-                    href={`mailto:${item.email}?subject=Re: Your feedback about EssayPolish`}
+                    href={`mailto:${item.email}?subject=Re: Your feedback about Essaytude`}
                     className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
                   >
                     Reply

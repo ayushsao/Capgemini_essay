@@ -124,10 +124,10 @@ export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
             <span className="text-white text-lg sm:text-xl font-bold relative z-10">📝</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent leading-tight mb-2">
-            EssayPolish
+            Essaytude
           </h1>
           <h2 className="text-lg sm:text-xl font-semibold text-gray-700 mb-2">
-            {isLogin ? 'Welcome back!' : 'Join EssayPolish'}
+            {isLogin ? 'Welcome back!' : 'Join Essaytude'}
           </h2>
           <p className="mt-2 text-sm text-gray-600 leading-relaxed px-2 max-w-sm mx-auto">
             {isLogin 
@@ -349,7 +349,7 @@ export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
           <div className="relative z-10">
             <div className="text-center mb-6 sm:mb-8">
               <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-                Why choose EssayPolish?
+                Why choose Essaytude?
               </h3>
               <p className="text-gray-600 text-sm sm:text-base">
                 Join thousands of writers improving their skills daily

@@ -54,7 +54,7 @@ export default function LandingPageLoader() {
 
         {/* Brand name */}
         <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-2">
-          EssayPolish
+          Essaytude
         </h1>
         <p className="text-gray-600 mb-8">Professional Writing Tutor</p>
 

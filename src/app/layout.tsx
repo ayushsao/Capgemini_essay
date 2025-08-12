@@ -3,7 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 
 export const metadata: Metadata = {
-  title: "EssayPolish - Professional Essay Writing Tutor",
+  title: "Essaytude - Professional Essay Writing Tutor",
   description: "Professional essay analysis and writing improvement platform powered by AI",
 };
 

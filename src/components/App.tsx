@@ -1,7 +1,7 @@
 'use client';
 
 /*
- * EssayPolish - Professional Essay Writing Tutor
+ * Essaytude - Professional Essay Writing Tutor
  * © 2025 Ayush Kumar Sao. All rights reserved.
  * 
  * A comprehensive essay analysis and writing improvement platform
@@ -15,6 +15,7 @@ import EssayTutor from './EssayTutor';
 import Preloader from './Preloader';
 import UserProfile from './UserProfile';
 import FeedbackButton from './FeedbackButton';
+import Chatbot from './Chatbot';
 import { isCurrentUserAdmin } from '@/utils/adminUtils';
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
   const [dashboardTab, setDashboardTab] = useState<'overview' | 'essays' | 'progress' | 'profile' | 'firebase'>('overview');
   const [showPreloader, setShowPreloader] = useState(true);
   const [appReady, setAppReady] = useState(false);
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
 
   // Check if current user is admin
   const isAdmin = isCurrentUserAdmin(user);
@@ -80,7 +82,7 @@ export default function App() {
                   </div>
                   <div>
                     <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-tight">
-                      EssayPolish
+                      Essaytude
                     </h1>
                     <p className="text-xs sm:text-sm lg:text-base text-gray-500 font-medium">Professional Essay Writing Tutor</p>
                   </div>
@@ -129,7 +131,7 @@ export default function App() {
                   </svg>
                 </div>
                 <h3 className="text-xl font-bold bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent">
-                  EssayPolish - Professional Writing Tutor
+                  Essaytude - Professional Writing Tutor
                 </h3>
               </div>
               
@@ -168,6 +170,23 @@ export default function App() {
           </div>
         </footer>
         <FeedbackButton />
+        
+        {/* Chatbot Floating Button */}
+        <button
+          onClick={() => setIsChatbotOpen(true)}
+          className="fixed top-20 right-4 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-40"
+          title="AI Writing Assistant"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+        </button>
+        
+        {/* Chatbot Component */}
+        <Chatbot 
+          isOpen={isChatbotOpen} 
+          onClose={() => setIsChatbotOpen(false)} 
+        />
       </div>
     );
   }
@@ -179,6 +198,23 @@ export default function App() {
         initialTab={dashboardTab}
       />
       <FeedbackButton />
+      
+      {/* Chatbot Floating Button */}
+      <button
+        onClick={() => setIsChatbotOpen(true)}
+        className="fixed top-20 right-4 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-40"
+        title="AI Writing Assistant"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+      </button>
+      
+      {/* Chatbot Component */}
+      <Chatbot 
+        isOpen={isChatbotOpen} 
+        onClose={() => setIsChatbotOpen(false)} 
+      />
     </>
   );
 }

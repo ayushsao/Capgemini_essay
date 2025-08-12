@@ -388,7 +388,7 @@ export default function Dashboard({ onNavigateToEssayWriter, initialTab = 'overv
               <div className="h-7 w-7 sm:h-8 sm:w-8 bg-blue-600 rounded-lg flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0">
                 <span className="text-white font-bold text-sm sm:text-base">📝</span>
               </div>
-              <h1 className="text-lg sm:text-xl font-bold text-blue-600 truncate">EssayPolish</h1>
+              <h1 className="text-lg sm:text-xl font-bold text-blue-600 truncate">Essaytude</h1>
             </div>
             
             <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
