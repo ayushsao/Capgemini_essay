@@ -20,8 +20,20 @@ export default function FeedbackDashboard() {
   // Load feedback from localStorage (temporary storage)
   useEffect(() => {
     const savedFeedbacks = localStorage.getItem('essaypolish_feedbacks');
+    console.log('🔍 Loading feedbacks from localStorage:', savedFeedbacks);
+    
     if (savedFeedbacks) {
-      setFeedbacks(JSON.parse(savedFeedbacks));
+      try {
+        const parsedFeedbacks = JSON.parse(savedFeedbacks);
+        console.log('✅ Parsed feedbacks:', parsedFeedbacks);
+        setFeedbacks(parsedFeedbacks);
+      } catch (error) {
+        console.error('❌ Error parsing feedbacks:', error);
+        setFeedbacks([]);
+      }
+    } else {
+      console.log('ℹ️ No feedbacks found in localStorage');
+      setFeedbacks([]);
     }
   }, []);
 
@@ -37,6 +49,33 @@ export default function FeedbackDashboard() {
     const updatedFeedbacks = feedbacks.filter(item => item.id !== id);
     setFeedbacks(updatedFeedbacks);
     localStorage.setItem('essaypolish_feedbacks', JSON.stringify(updatedFeedbacks));
+  };
+
+  // Add test feedback for debugging
+  const addTestFeedback = () => {
+    const testFeedback: FeedbackItem = {
+      id: Date.now().toString(),
+      feedback: 'This is a test feedback to verify the system is working!',
+      email: 'test@example.com',
+      rating: 5,
+      category: 'general',
+      timestamp: new Date().toISOString(),
+      status: 'new'
+    };
+    
+    const updatedFeedbacks = [testFeedback, ...feedbacks];
+    setFeedbacks(updatedFeedbacks);
+    localStorage.setItem('essaypolish_feedbacks', JSON.stringify(updatedFeedbacks));
+    console.log('✅ Test feedback added:', testFeedback);
+  };
+
+  // Refresh feedbacks from localStorage
+  const refreshFeedbacks = () => {
+    const savedFeedbacks = localStorage.getItem('essaypolish_feedbacks');
+    console.log('🔄 Refreshing feedbacks:', savedFeedbacks);
+    if (savedFeedbacks) {
+      setFeedbacks(JSON.parse(savedFeedbacks));
+    }
   };
 
   const filteredFeedbacks = feedbacks.filter(item => {
@@ -70,8 +109,26 @@ export default function FeedbackDashboard() {
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="bg-white rounded-xl shadow-lg p-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Feedback Management</h1>
-        <p className="text-gray-600">Manage and respond to user feedback for EssayPolish</p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Feedback Management</h1>
+            <p className="text-gray-600">Manage and respond to user feedback for EssayPolish</p>
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={refreshFeedbacks}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              🔄 Refresh
+            </button>
+            <button
+              onClick={addTestFeedback}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              ➕ Add Test
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Statistics */}
@@ -131,6 +188,26 @@ export default function FeedbackDashboard() {
             </select>
           </div>
         </div>
+      </div>
+
+      {/* Debug Information */}
+      <div className="bg-gray-50 rounded-xl shadow-lg p-4">
+        <details className="cursor-pointer">
+          <summary className="font-medium text-gray-700 mb-2">🔍 Debug Information</summary>
+          <div className="text-sm text-gray-600 space-y-2">
+            <p><strong>Total feedbacks loaded:</strong> {feedbacks.length}</p>
+            <p><strong>Filtered feedbacks:</strong> {filteredFeedbacks.length}</p>
+            <p><strong>Current filter:</strong> {filter}</p>
+            <p><strong>Current category:</strong> {selectedCategory}</p>
+            <p><strong>localStorage key:</strong> essaypolish_feedbacks</p>
+            <div className="mt-2">
+              <strong>Raw localStorage data:</strong>
+              <pre className="bg-white p-2 rounded border text-xs overflow-auto max-h-32">
+                {localStorage.getItem('essaypolish_feedbacks') || 'No data found'}
+              </pre>
+            </div>
+          </div>
+        </details>
       </div>
 
       {/* Feedback List */}
