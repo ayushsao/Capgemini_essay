@@ -33,18 +33,6 @@ export default function UserProfile({ onNavigateToDashboard, onNavigateToProfile
     };
   }, []);
 
-  // Debug user data only on client side
-  useEffect(() => {
-    if (isClient && user) {
-      console.log('UserProfile - Current user data:', {
-        name: user.name,
-        email: user.email,
-        avatar: user.avatar,
-        authProvider: user.authProvider
-      });
-    }
-  }, [isClient, user]);
-
   if (!user || !isClient) return null;
 
   const getInitials = (name: string) => {
@@ -77,15 +65,15 @@ export default function UserProfile({ onNavigateToDashboard, onNavigateToProfile
       >
         <div className="flex items-center space-x-2">
           {/* Avatar */}
-          <div className="relative">
+          <div className="relative overflow-hidden">
             {user.avatar && user.avatar.trim() !== '' ? (
               <>
                 <img
-                  className="h-10 w-10 rounded-full border-2 border-white shadow-sm"
+                  className="h-10 w-10 rounded-full border-2 border-white shadow-sm object-cover object-center"
                   src={user.avatar}
                   alt={user.name}
                   onError={(e) => {
-                    console.error('Failed to load avatar:', user.avatar);
+                    // Silently handle avatar loading error
                     const target = e.currentTarget;
                     const fallback = target.parentElement?.querySelector('.avatar-fallback') as HTMLElement;
                     if (fallback) {
@@ -143,11 +131,11 @@ export default function UserProfile({ onNavigateToDashboard, onNavigateToProfile
               {user.avatar && user.avatar.trim() !== '' ? (
                 <>
                   <img
-                    className="h-12 w-12 rounded-full"
+                    className="h-12 w-12 rounded-full object-cover object-center flex-shrink-0"
                     src={user.avatar}
                     alt={user.name}
                     onError={(e) => {
-                      console.error('Failed to load dropdown avatar:', user.avatar);
+                      // Silently handle dropdown avatar loading error
                       const target = e.currentTarget;
                       const fallback = target.parentElement?.querySelector('.dropdown-avatar-fallback') as HTMLElement;
                       if (fallback) {
@@ -157,14 +145,14 @@ export default function UserProfile({ onNavigateToDashboard, onNavigateToProfile
                       }
                     }}
                   />
-                  <div className="hidden dropdown-avatar-fallback h-12 w-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold">
+                  <div className="hidden dropdown-avatar-fallback h-12 w-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold flex-shrink-0">
                     <div className="flex items-center justify-center h-full">
                       {getInitials(user.name)}
                     </div>
                   </div>
                 </>
               ) : (
-                <div className="h-12 w-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                <div className="h-12 w-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
                   {getInitials(user.name)}
                 </div>
               )}

@@ -177,8 +177,8 @@ export default function App() {
           className="fixed top-20 right-4 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-40"
           title="AI Writing Assistant"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H9V3H13.5L19 8.5V9H21ZM7.5 8C6.1 8 5 9.1 5 10.5V17.5C5 18.9 6.1 20 7.5 20H16.5C17.9 20 19 18.9 19 17.5V10.5C19 9.1 17.9 8 16.5 8H7.5ZM9 11H11V13H9V11ZM13 11H15V13H13V11ZM7.5 15.5C7.5 16.3 8.2 17 9 17H15C15.8 17 16.5 16.3 16.5 15.5C16.5 14.7 15.8 14 15 14H9C8.2 14 7.5 14.7 7.5 15.5Z"/>
           </svg>
         </button>
         
@@ -205,8 +205,8 @@ export default function App() {
         className="fixed top-20 right-4 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-40"
         title="AI Writing Assistant"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H9V3H13.5L19 8.5V9H21ZM7.5 8C6.1 8 5 9.1 5 10.5V17.5C5 18.9 6.1 20 7.5 20H16.5C17.9 20 19 18.9 19 17.5V10.5C19 9.1 17.9 8 16.5 8H7.5ZM9 11H11V13H9V11ZM13 11H15V13H13V11ZM7.5 15.5C7.5 16.3 8.2 17 9 17H15C15.8 17 16.5 16.3 16.5 15.5C16.5 14.7 15.8 14 15 14H9C8.2 14 7.5 14.7 7.5 15.5Z"/>
         </svg>
       </button>
       

@@ -576,6 +576,51 @@ export default function Dashboard({ onNavigateToEssayWriter, initialTab = 'overv
           </div>
         )}
       </div>
+      
+      {/* Footer with Navigation Links */}
+      <footer className="bg-white border-t border-gray-200 mt-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between">
+            <div className="flex items-center space-x-6 mb-4 sm:mb-0">
+              <a 
+                href="/about" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-300"
+              >
+                About Us
+              </a>
+              <a 
+                href="/contact" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-300"
+              >
+                Contact
+              </a>
+              <a 
+                href="/privacy" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-300"
+              >
+                Privacy Policy
+              </a>
+              <a 
+                href="/terms" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-300"
+              >
+                Terms of Service
+              </a>
+            </div>
+            <div className="text-sm text-gray-500">
+              © 2025 Essaytude. All rights reserved.
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

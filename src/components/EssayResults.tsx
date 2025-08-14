@@ -174,11 +174,7 @@ export default function EssayResults({ analysis }: EssayResultsProps) {
                     <div className="flex items-center justify-between">
                       <p className="font-medium text-red-800">&ldquo;{error.text}&rdquo;</p>
                       {error.source && (
-                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                          error.source === 'LanguageTool' ? 'bg-blue-100 text-blue-600' :
-                          error.source === 'Grammarly-Style' ? 'bg-green-100 text-green-600' :
-                          'bg-gray-100 text-gray-600'
-                        }`}>
+                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${error.source === 'LanguageTool' ? 'bg-blue-100 text-blue-600' : error.source === 'Grammarly-Style' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'}`}>
                           {error.source === 'Grammarly-Style' ? '🧠 Grammarly' : 
                            error.source === 'LanguageTool' ? '🔧 LanguageTool' : 
                            '📝 Local'}
@@ -240,11 +236,7 @@ export default function EssayResults({ analysis }: EssayResultsProps) {
               <span className="text-red-600 font-semibold">
                 {plagiarismCheck.percentage}% similarity detected
               </span>
-              <span className={`ml-2 px-2 py-1 rounded text-sm font-medium ${
-                plagiarismCheck.isOriginal 
-                  ? 'bg-green-100 text-green-800' 
-                  : 'bg-red-100 text-red-800'
-              }`}>
+              <span className={`ml-2 px-2 py-1 rounded text-sm font-medium ${plagiarismCheck.isOriginal ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                 {plagiarismCheck.isOriginal ? 'ACCEPTABLE' : 'NEEDS REVISION'}
               </span>
             </div>
@@ -261,11 +253,7 @@ export default function EssayResults({ analysis }: EssayResultsProps) {
               <div key={index} className="bg-gray-50 border border-gray-200 rounded-lg p-3">
                 <div className="flex items-start justify-between mb-2">
                   <span className="text-sm font-medium text-gray-700">Source: {match.source}</span>
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${
-                    match.similarity >= 80 ? 'bg-red-100 text-red-700' :
-                    match.similarity >= 50 ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-blue-100 text-blue-700'
-                  }`}>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${match.similarity >= 80 ? 'bg-red-100 text-red-700' : match.similarity >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'}`}>
                     {match.similarity}% match
                   </span>
                 </div>
@@ -279,28 +267,16 @@ export default function EssayResults({ analysis }: EssayResultsProps) {
       {/* AI Detection Results */}
       <div className="bg-white rounded-lg border border-purple-200 shadow-sm p-6">
         <h4 className="text-lg font-semibold text-purple-800 mb-4">🤖 AI Content Detection</h4>
-        <div className={`border rounded-lg p-4 mb-4 ${
-          aiDetection?.isAIGenerated 
-            ? 'border-red-200 bg-red-50' 
-            : 'border-green-200 bg-green-50'
-        }`}>
+        <div className={`border rounded-lg p-4 mb-4 ${aiDetection?.isAIGenerated ? 'border-red-200 bg-red-50' : 'border-green-200 bg-green-50'}`}>
           <div className="flex items-center mb-2">
-            <span className={`font-semibold ${
-              aiDetection?.isAIGenerated ? 'text-red-600' : 'text-green-600'
-            }`}>
+            <span className={`font-semibold ${aiDetection?.isAIGenerated ? 'text-red-600' : 'text-green-600'}`}>
               {aiDetection?.confidence || 0}% AI confidence
             </span>
-            <span className={`ml-2 px-2 py-1 rounded text-sm font-medium ${
-              aiDetection?.isAIGenerated 
-                ? 'bg-red-100 text-red-800' 
-                : 'bg-green-100 text-green-800'
-            }`}>
+            <span className={`ml-2 px-2 py-1 rounded text-sm font-medium ${aiDetection?.isAIGenerated ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
               {aiDetection?.isAIGenerated ? 'AI DETECTED' : 'HUMAN WRITTEN'}
             </span>
           </div>
-          <p className={`text-sm ${
-            aiDetection?.isAIGenerated ? 'text-red-700' : 'text-green-700'
-          }`}>
+          <p className={`text-sm ${aiDetection?.isAIGenerated ? 'text-red-700' : 'text-green-700'}`}>
             {aiDetection?.isAIGenerated 
               ? 'This content shows characteristics of AI generation. Please review and ensure originality.' 
               : 'This content appears to be human-written with natural patterns.'}
@@ -337,18 +313,10 @@ export default function EssayResults({ analysis }: EssayResultsProps) {
           <h4 className="text-lg font-semibold text-orange-800 mb-4">🎯 Areas for Improvement</h4>
           <div className="space-y-4">
             {improvementAreas.map((area, index) => (
-              <div key={index} className={`p-4 rounded-lg border-l-4 ${
-                area.priority === 'high' ? 'border-red-500 bg-red-50' :
-                area.priority === 'medium' ? 'border-yellow-500 bg-yellow-50' :
-                'border-blue-500 bg-blue-50'
-              }`}>
+              <div key={index} className={`p-4 rounded-lg border-l-4 ${area.priority === 'high' ? 'border-red-500 bg-red-50' : area.priority === 'medium' ? 'border-yellow-500 bg-yellow-50' : 'border-blue-500 bg-blue-50'}`}>
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mr-3 ${
-                      area.priority === 'high' ? 'bg-red-100 text-red-800' :
-                      area.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-blue-100 text-blue-800'
-                    }`}>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mr-3 ${area.priority === 'high' ? 'bg-red-100 text-red-800' : area.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'}`}>
                       {area.priority.toUpperCase()} PRIORITY
                     </span>
                     <h5 className="font-semibold text-gray-800">{area.category}</h5>
@@ -378,11 +346,7 @@ export default function EssayResults({ analysis }: EssayResultsProps) {
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
-                      className={`h-2 rounded-full ${
-                        area.priority === 'high' ? 'bg-red-500' :
-                        area.priority === 'medium' ? 'bg-yellow-500' :
-                        'bg-blue-500'
-                      }`}
+                      className={`h-2 rounded-full ${area.priority === 'high' ? 'bg-red-500' : area.priority === 'medium' ? 'bg-yellow-500' : 'bg-blue-500'}`}
                       style={{ width: `${(area.currentScore / 10) * 100}%` }}
                     ></div>
                   </div>
