@@ -6,6 +6,7 @@ interface AIResponse {
   success: boolean;
   source: string;
 }
+import { siteConfig } from '@/config/metadata';
 
 // Groq API (Free tier available)
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
@@ -43,7 +44,7 @@ async function tryGroqAPI(message: string): Promise<AIResponse> {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama3-8b-8192', // Free model
+        model: 'llama-3.1-8b-instant', // Updated model name
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: message }
@@ -80,7 +81,7 @@ async function tryOpenRouterAPI(message: string): Promise<AIResponse> {
       headers: {
         'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'http://localhost:3000',
+        'HTTP-Referer': siteConfig.url,
         'X-Title': 'Essay Writing Assistant',
       },
       body: JSON.stringify({

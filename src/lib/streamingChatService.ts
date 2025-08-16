@@ -13,6 +13,9 @@ interface StreamingOptions {
   systemPrompt?: string;
 }
 
+// Ollama Local Streaming
+const OLLAMA_API_URL = process.env.NEXT_PUBLIC_OLLAMA_API_URL || 'http://localhost:11434/api/chat';
+
 // Groq AI Streaming
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
@@ -26,7 +29,7 @@ export async function streamGroqResponse(
   const apiKey = process.env.NEXT_PUBLIC_GROQ_API_KEY;
   
   if (!apiKey) {
-    onError('Groq API key not configured');
+    onError('Groq API key not configured. Please set NEXT_PUBLIC_GROQ_API_KEY.');
     return;
   }
 
@@ -109,7 +112,7 @@ export async function streamTogetherResponse(
   const apiKey = process.env.NEXT_PUBLIC_TOGETHER_API_KEY;
   
   if (!apiKey) {
-    onError('Together API key not configured');
+    onError('Together API key not configured. Please set NEXT_PUBLIC_TOGETHER_API_KEY.');
     return;
   }
 
@@ -187,7 +190,7 @@ export async function streamOllamaResponse(
   onComplete: () => void,
   onError: (error: string) => void
 ): Promise<void> {
-  const ollamaUrl = 'http://localhost:11434/api/chat';
+  const ollamaUrl = OLLAMA_API_URL;
   
   try {
     const response = await fetch(ollamaUrl, {
@@ -196,7 +199,7 @@ export async function streamOllamaResponse(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: options.model || 'llama3.1',
+        model: options.model || 'llama3.1:latest',
         messages,
         stream: true,
         options: {
@@ -207,7 +210,11 @@ export async function streamOllamaResponse(
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorBody = await response.text();
+      console.error('Ollama API error:', errorBody);
+      throw new Error(
+        `Ollama API request failed with status ${response.status}: ${errorBody || 'No error body'}`
+      );
     }
 
     const reader = response.body?.getReader();
@@ -247,7 +254,11 @@ export async function streamOllamaResponse(
     }
   } catch (error) {
     console.error('Ollama streaming error:', error);
-    onError(error instanceof Error ? error.message : 'Unknown error occurred');
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      onError(`Could not connect to Ollama at ${ollamaUrl}. Please ensure Ollama is running and accessible, and that your browser can make requests to it (CORS).`);
+    } else {
+      onError(error instanceof Error ? error.message : 'An unknown error occurred with Ollama');
+    }
   }
 }
 

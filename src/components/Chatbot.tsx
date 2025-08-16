@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, X, MessageCircle, HelpCircle, BookOpen, FileText, Shield, Zap, Volume2, VolumeX } from 'lucide-react';
-import { getAIResponse, hasAIAPIKeys, getAvailableAIServices } from '@/lib/aiChatService';
+import { hasAIAPIKeys, getAvailableAIServices } from '@/lib/aiChatService';
 import { streamAIResponse } from '@/lib/streamingChatService';
 import { 
   playMessageSent, 
@@ -134,32 +134,6 @@ Ask me anything about writing, or use the quick actions below!`,
     scrollToBottom();
   }, [messages]);
 
-  const generateBotResponse = async (userMessage: string): Promise<Message> => {
-    try {
-      console.log('🤖 Generating AI response for:', userMessage);
-      
-      // Get AI response
-      const aiResponseText = await getAIResponse(userMessage);
-      
-      return {
-        id: Date.now().toString(),
-        text: aiResponseText,
-        isBot: true,
-        timestamp: new Date()
-      };
-    } catch (error) {
-      console.error('Error generating AI response:', error);
-      
-      // Fallback response
-      return {
-        id: Date.now().toString(),
-        text: "I'm having trouble connecting to AI services right now, but I can still help with essay writing tips! What specific area would you like assistance with?",
-        isBot: true,
-        timestamp: new Date()
-      };
-    }
-  };
-
   const handleSendMessage = async () => {
     if (!inputText.trim() || isStreaming) return;
 
@@ -236,7 +210,7 @@ Ask me anything about writing, or use the quick actions below!`,
           // Add error message
           const errorMessage: Message = {
             id: (Date.now() + 2).toString(),
-            text: "Sorry, I'm having trouble responding right now. Let me try a different approach to help you with your essay writing question!",
+            text: `Sorry, I encountered an error: ${error}. Please check your configuration or try again later.`,
             isBot: true,
             timestamp: new Date()
           };
