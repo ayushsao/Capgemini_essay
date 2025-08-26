@@ -160,6 +160,37 @@ export async function generateEssayImprovements(
   }
 }
 
+// OpenAI Service - temporarily disabled for deployment
+// This service will be re-enabled once OpenAI integration is properly set up
+
+export const analyzeEssay = async (text: string) => {
+  // Mock implementation for deployment
+  return {
+    wordCount: text.split(' ').length,
+    grammarScore: Math.floor(Math.random() * 10) + 1,
+    spellingScore: Math.floor(Math.random() * 10) + 1,
+    clarityScore: Math.floor(Math.random() * 10) + 1,
+    coherenceScore: Math.floor(Math.random() * 10) + 1,
+    suggestions: [
+      "Consider adding more descriptive examples to support your arguments.",
+      "Review sentence structure for better flow and readability.",
+      "Strengthen your conclusion to better summarize key points."
+    ]
+  };
+};
+
+export const generateFeedback = async (essay: string) => {
+  return {
+    overallScore: Math.floor(Math.random() * 10) + 1,
+    feedback: "This is a mock feedback response. OpenAI integration will be enabled soon.",
+    improvements: [
+      "Focus on stronger thesis statements",
+      "Use more varied sentence structures",
+      "Include more supporting evidence"
+    ]
+  };
+};
+
 // Helper functions to extract information from text responses
 function extractScore(text: string): number {
   const scoreMatch = text.match(/score[:\s]*(\d+)/i);
