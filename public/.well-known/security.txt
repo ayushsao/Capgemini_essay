@@ -1,0 +1,8 @@
+Contact: mailto:security@essaytude.com
+Contact: https://essaytude.com/contact
+Expires: 2025-12-31T23:59:59.000Z
+Encryption: https://essaytude.com/pgp-key.txt
+Acknowledgments: https://essaytude.com/security/acknowledgments
+Preferred-Languages: en
+Canonical: https://essaytude.com/.well-known/security.txt
+Policy: https://essaytude.com/security/policy
