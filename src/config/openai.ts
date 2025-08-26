@@ -1,10 +1,30 @@
+// OpenAI configuration - temporarily using mock for deployment
+// Replace with actual OpenAI implementation when API key is configured
+
+// Temporary mock implementation
+const mockOpenAI = {
+  chat: {
+    completions: {
+      create: async () => ({
+        choices: [{ message: { content: "OpenAI service temporarily unavailable" } }]
+      })
+    }
+  }
+};
+
+export default mockOpenAI;
+
+/*
+// Uncomment this when OpenAI package is properly installed and API key is configured:
+
 import OpenAI from 'openai';
 
-// OpenAI Configuration
-export const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || process.env.NEXT_PUBLIC_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true // For client-side usage
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
 });
+
+export default openai;
+*/
 
 // ChatGPT Models
 export const CHATGPT_MODELS = {
