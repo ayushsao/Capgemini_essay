@@ -1,7 +1,6 @@
-// Temporary fix: Remove OpenAI import that's causing build failure
-// This will be replaced with proper OpenAI integration later
+// Mock OpenAI configuration for deployment - NO EXTERNAL DEPENDENCIES
+// This file provides mock implementations to avoid import errors
 
-// Mock OpenAI configuration for deployment
 export const mockOpenAI = {
   chat: {
     completions: {
@@ -11,8 +10,6 @@ export const mockOpenAI = {
     }
   }
 };
-
-export default mockOpenAI;
 
 // ChatGPT Models
 export const CHATGPT_MODELS = {
@@ -41,3 +38,5 @@ export const ESSAY_ANALYSIS_PROMPTS = {
   style: `Analyze the writing style, tone, and clarity of this essay:`,
   comprehensive: `Provide a comprehensive analysis of this essay covering grammar, structure, content, and style:`
 };
+
+export default mockOpenAI;

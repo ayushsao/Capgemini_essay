@@ -1,131 +1,200 @@
-// ChatGPT Demo - using OpenAI API for essay analysis
+// Capgemini Essay Writing Tutor - Comprehensive Essay Analysis and Feedback
 'use client';
 
 import React, { useState } from 'react';
-import { analyzeEssay, generateFeedback } from '@/services/openaiService';
+// NO OPENAI IMPORTS - using mock service only
+import { analyzeEssay, generateFeedback, analyzeRealTime, type EssayAnalysis, type FeedbackResponse } from '@/services/openaiService';
 
-const ChatGPTDemo: React.FC = () => {
-  const [input, setInput] = useState('');
-  const [analysis, setAnalysis] = useState<any>(null);
+const EssayTutor: React.FC = () => {
+  const [essay, setEssay] = useState('');
+  const [analysis, setAnalysis] = useState<FeedbackResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [realTimeStats, setRealTimeStats] = useState({ wordCount: 0, estimatedScore: 0 });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim()) return;
+  const handleEssayChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const text = e.target.value;
+    setEssay(text);
+    
+    // Real-time analysis
+    const stats = analyzeRealTime(text);
+    setRealTimeStats(stats);
+  };
+
+  const handleAnalyze = async () => {
+    if (!essay.trim()) return;
     
     setLoading(true);
-    
     try {
-      const [essayAnalysis, feedback] = await Promise.all([
-        analyzeEssay(input),
-        generateFeedback(input)
-      ]);
-      
-      setAnalysis({
-        ...essayAnalysis,
-        ...feedback
-      });
+      const feedback = await generateFeedback(essay);
+      setAnalysis(feedback);
     } catch (error) {
       console.error('Analysis failed:', error);
+      // Fallback analysis
       setAnalysis({
-        wordCount: input.split(/\s+/).length,
-        overallScore: 5,
-        feedback: 'Analysis temporarily unavailable. Please try again later.',
-        suggestions: ['Keep writing and practicing!']
+        overallScore: 6,
+        feedback: 'Analysis service temporarily unavailable. Please try again later.',
+        improvements: ['Keep practicing your writing skills!'],
+        analysis: {
+          wordCount: essay.split(/\s+/).length,
+          grammarScore: 6,
+          spellingScore: 6,
+          clarityScore: 6,
+          coherenceScore: 6,
+          totalScore: 6,
+          suggestions: ['Continue developing your writing abilities.']
+        }
       });
     } finally {
       setLoading(false);
     }
   };
 
+  const getScoreColor = (score: number) => {
+    if (score >= 8) return 'text-green-600';
+    if (score >= 6) return 'text-yellow-600';
+    return 'text-red-600';
+  };
+
+  const getScoreBg = (score: number) => {
+    if (score >= 8) return 'bg-green-100';
+    if (score >= 6) return 'bg-yellow-100';
+    return 'bg-red-100';
+  };
+
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <div className="mb-6">
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">
-          Capgemini Essay Writing Tutor
-        </h2>
-        <p className="text-gray-600">
-          Get instant AI-powered feedback on your essay writing
-        </p>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-6xl mx-auto px-4">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Capgemini Essay Writing Tutor
+          </h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Get instant AI-powered feedback on your essay writing. Improve your grammar, 
+            structure, and overall writing quality with detailed analysis and suggestions.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Essay Input Section */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-semibold text-gray-800">Write Your Essay</h2>
+                <div className="text-sm text-gray-500">
+                  Words: <span className="font-medium">{realTimeStats.wordCount}</span>
+                </div>
+              </div>
+              
+              <textarea
+                value={essay}
+                onChange={handleEssayChange}
+                placeholder="Start writing your essay here. Our AI will analyze your writing for grammar, structure, clarity, and coherence..."
+                className="w-full h-96 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-gray-700"
+              />
+              
+              <div className="mt-4 flex justify-between items-center">
+                <div className="text-sm text-gray-500">
+                  Estimated Score: <span className={`font-medium ${getScoreColor(realTimeStats.estimatedScore)}`}>
+                    {realTimeStats.estimatedScore}/10
+                  </span>
+                </div>
+                <button
+                  onClick={handleAnalyze}
+                  disabled={loading || !essay.trim()}
+                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  {loading ? 'Analyzing...' : 'Analyze Essay'}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Analysis Results Section */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">Essay Analysis</h3>
+              
+              {!analysis ? (
+                <div className="text-center py-12">
+                  <div className="text-gray-400 mb-4">
+                    <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <p className="text-gray-500">Write your essay and click "Analyze Essay" to get detailed feedback</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {/* Overall Score */}
+                  <div className={`${getScoreBg(analysis.overallScore)} p-4 rounded-lg text-center`}>
+                    <div className="text-3xl font-bold text-gray-800 mb-1">
+                      {analysis.overallScore}/10
+                    </div>
+                    <div className="text-sm text-gray-600">Overall Score</div>
+                  </div>
+
+                  {/* Detailed Scores */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-800">Detailed Analysis</h4>
+                    {[
+                      { label: 'Grammar', score: analysis.analysis.grammarScore },
+                      { label: 'Spelling', score: analysis.analysis.spellingScore },
+                      { label: 'Clarity', score: analysis.analysis.clarityScore },
+                      { label: 'Coherence', score: analysis.analysis.coherenceScore }
+                    ].map((item) => (
+                      <div key={item.label} className="flex justify-between items-center">
+                        <span className="text-gray-700">{item.label}</span>
+                        <span className={`font-medium ${getScoreColor(item.score)}`}>
+                          {item.score}/10
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Feedback */}
+                  <div>
+                    <h4 className="font-semibold text-gray-800 mb-2">AI Feedback</h4>
+                    <p className="text-gray-700 text-sm bg-blue-50 p-3 rounded-lg">
+                      {analysis.feedback}
+                    </p>
+                  </div>
+
+                  {/* Suggestions */}
+                  <div>
+                    <h4 className="font-semibold text-gray-800 mb-2">Improvement Suggestions</h4>
+                    <ul className="space-y-2">
+                      {analysis.improvements.map((suggestion, index) => (
+                        <li key={index} className="flex items-start text-sm text-gray-700">
+                          <span className="text-green-500 mr-2 mt-1">•</span>
+                          {suggestion}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Detailed Suggestions */}
+                  {analysis.analysis.suggestions.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold text-gray-800 mb-2">Writing Tips</h4>
+                      <ul className="space-y-2">
+                        {analysis.analysis.suggestions.map((suggestion, index) => (
+                          <li key={index} className="flex items-start text-sm text-gray-700">
+                            <span className="text-blue-500 mr-2 mt-1">•</span>
+                            {suggestion}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
-
-      <form onSubmit={handleSubmit} className="space-y-4 mb-6">
-        <div>
-          <label htmlFor="essay-input" className="block text-sm font-medium text-gray-700 mb-2">
-            Enter your essay text:
-          </label>
-          <textarea
-            id="essay-input"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-            rows={8}
-            placeholder="Type your essay here for AI analysis..."
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={loading || !input.trim()}
-          className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
-        >
-          {loading ? 'Analyzing Essay...' : 'Analyze Essay'}
-        </button>
-      </form>
-      
-      {analysis && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-semibold text-gray-800 mb-3">Essay Metrics</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Word Count:</span>
-                  <span className="font-medium">{analysis.wordCount}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Overall Score:</span>
-                  <span className="font-medium text-blue-600">{analysis.overallScore}/10</span>
-                </div>
-                {analysis.grammarScore && (
-                  <div className="flex justify-between">
-                    <span>Grammar:</span>
-                    <span className="font-medium">{analysis.grammarScore}/10</span>
-                  </div>
-                )}
-                {analysis.spellingScore && (
-                  <div className="flex justify-between">
-                    <span>Spelling:</span>
-                    <span className="font-medium">{analysis.spellingScore}/10</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h3 className="font-semibold text-gray-800 mb-2">AI Feedback</h3>
-              <p className="text-gray-700 text-sm">{analysis.feedback}</p>
-            </div>
-
-            {analysis.suggestions && analysis.suggestions.length > 0 && (
-              <div className="bg-green-50 p-4 rounded-lg">
-                <h3 className="font-semibold text-gray-800 mb-2">Suggestions</h3>
-                <ul className="space-y-1">
-                  {analysis.suggestions.slice(0, 3).map((suggestion: string, index: number) => (
-                    <li key={index} className="text-sm text-gray-700 flex items-start">
-                      <span className="text-green-600 mr-2">•</span>
-                      {suggestion}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
-export default ChatGPTDemo;
+export default EssayTutor;
