@@ -1,4 +1,4 @@
-# Capgemini Essay Writing Tutor
+# Essay Writing Tutor
 
 **© 2025 Ayush Kumar Sao. All rights reserved.**
 
@@ -172,4 +172,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For more information about the enhanced spelling features, see [SPELLING_ENHANCEMENT.md](SPELLING_ENHANCEMENT.md)
 
-**Capgemini Essay Writing Tutor** - Empowering students with intelligent essay analysis and feedback.
+** Essay Writing Tutor** - Empowering students with intelligent essay analysis and feedback.
