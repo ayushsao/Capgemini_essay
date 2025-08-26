@@ -1,30 +1,18 @@
-// OpenAI configuration - temporarily using mock for deployment
-// Replace with actual OpenAI implementation when API key is configured
+// Temporary fix: Remove OpenAI import that's causing build failure
+// This will be replaced with proper OpenAI integration later
 
-// Temporary mock implementation
-const mockOpenAI = {
+// Mock OpenAI configuration for deployment
+export const mockOpenAI = {
   chat: {
     completions: {
       create: async () => ({
-        choices: [{ message: { content: "OpenAI service temporarily unavailable" } }]
+        choices: [{ message: { content: "OpenAI temporarily disabled for deployment" } }]
       })
     }
   }
 };
 
 export default mockOpenAI;
-
-/*
-// Uncomment this when OpenAI package is properly installed and API key is configured:
-
-import OpenAI from 'openai';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-export default openai;
-*/
 
 // ChatGPT Models
 export const CHATGPT_MODELS = {

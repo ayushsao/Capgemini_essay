@@ -160,33 +160,55 @@ export async function generateEssayImprovements(
   }
 }
 
-// OpenAI Service - temporarily disabled for deployment
-// This service will be re-enabled once OpenAI integration is properly set up
+// OpenAI Service - Mock implementation for deployment
+// Real OpenAI integration will be added later
 
-export const analyzeEssay = async (text: string) => {
+export interface EssayAnalysis {
+  wordCount: number;
+  grammarScore: number;
+  spellingScore: number;
+  clarityScore: number;
+  coherenceScore: number;
+  suggestions: string[];
+}
+
+export interface FeedbackResponse {
+  overallScore: number;
+  feedback: string;
+  improvements: string[];
+}
+
+export const analyzeEssay = async (text: string): Promise<EssayAnalysis> => {
   // Mock implementation for deployment
+  const wordCount = text.split(/\s+/).filter(word => word.length > 0).length;
+  
   return {
-    wordCount: text.split(' ').length,
-    grammarScore: Math.floor(Math.random() * 10) + 1,
-    spellingScore: Math.floor(Math.random() * 10) + 1,
-    clarityScore: Math.floor(Math.random() * 10) + 1,
-    coherenceScore: Math.floor(Math.random() * 10) + 1,
+    wordCount,
+    grammarScore: Math.floor(Math.random() * 3) + 7, // 7-10 range
+    spellingScore: Math.floor(Math.random() * 3) + 7, // 7-10 range
+    clarityScore: Math.floor(Math.random() * 3) + 6, // 6-9 range
+    coherenceScore: Math.floor(Math.random() * 3) + 6, // 6-9 range
     suggestions: [
       "Consider adding more descriptive examples to support your arguments.",
       "Review sentence structure for better flow and readability.",
-      "Strengthen your conclusion to better summarize key points."
+      "Strengthen your conclusion to better summarize key points.",
+      "Use more varied vocabulary to enhance your writing style."
     ]
   };
 };
 
-export const generateFeedback = async (essay: string) => {
+export const generateFeedback = async (essay: string): Promise<FeedbackResponse> => {
+  const wordCount = essay.split(/\s+/).filter(word => word.length > 0).length;
+  const score = wordCount > 100 ? Math.floor(Math.random() * 3) + 7 : Math.floor(Math.random() * 5) + 4;
+  
   return {
-    overallScore: Math.floor(Math.random() * 10) + 1,
-    feedback: "This is a mock feedback response. OpenAI integration will be enabled soon.",
+    overallScore: score,
+    feedback: `Your essay contains ${wordCount} words. This is a mock analysis - AI features will be available soon with proper scoring and detailed feedback.`,
     improvements: [
       "Focus on stronger thesis statements",
-      "Use more varied sentence structures",
-      "Include more supporting evidence"
+      "Use more varied sentence structures", 
+      "Include more supporting evidence",
+      "Improve paragraph transitions"
     ]
   };
 };
