@@ -1,0 +1,40 @@
+{
+  "name": "virtual-tutor",
+  "version": "0.1.0",
+  "author": "Ayush Kumar Sao",
+  "description": "Essaytude - A comprehensive essay analysis and writing improvement platform powered by AI",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "build:analyze": "ANALYZE=true next build",
+    "export": "next build && next export",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf .next out"
+  },
+  "dependencies": {
+    "@tailwindcss/forms": "^0.5.10",
+    "@tailwindcss/typography": "^0.5.16",
+    "compromise": "^14.14.4",
+    "firebase": "^12.2.1",
+    "lucide-react": "^0.539.0",
+    "natural": "^8.1.0",
+    "next": "15.4.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "recharts": "^2.8.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "eslint": "^9",
+    "eslint-config-next": "15.4.5",
+    "tailwindcss": "^4",
+    "typescript": "^5.3.0"
+  }
+}
