@@ -1,0 +1,52 @@
+// Firestore Security Rules for EssayPolish Feedback System
+// Copy these rules to your Firebase Console -> Firestore Database -> Rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow read/write access to feedbacks collection for all users
+    // In production, you may want to add authentication checks
+    match /feedbacks/{document} {
+      // Allow anyone to create feedback (users submitting feedback)
+      allow create: if request.auth != null || request.auth == null;
+      
+      // Allow anyone to read feedback (for admin dashboard)
+      allow read: if true;
+      
+      // Allow updates and deletes for authenticated users only
+      // (admin operations)
+      allow update, delete: if request.auth != null;
+    }
+    
+    // For other collections, maintain default security
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+
+/* 
+INSTRUCTIONS TO APPLY THESE RULES:
+
+1. Go to Firebase Console (https://console.firebase.google.com/)
+2. Select your project: capgemini-essay-tutor
+3. Go to Firestore Database
+4. Click on "Rules" tab
+5. Replace the existing rules with the rules above
+6. Click "Publish"
+
+ALTERNATIVE - More Permissive Rules for Testing:
+If you want to test quickly, you can use these temporary rules:
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+
+⚠️ WARNING: The alternative rules allow anyone to read/write. 
+Only use for testing, not production!
+*/
