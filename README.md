@@ -3,11 +3,6 @@
 
 A comprehensive AI-powered essay analysis and writing improvement platform designed to help students enhance their academic writing skills with professional feedback and real-time analysis.
 
-![Capgemini Essay Tutor](https://img.shields.io/badge/Capgemini-Essay%20Tutor-blue?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K)
-![Next.js](https://img.shields.io/badge/Next.js-15.4.5-black?style=flat-square&logo=next.js)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)
-![Firebase](https://img.shields.io/badge/Firebase-Auth%20%26%20Firestore-orange?style=flat-square&logo=firebase)
-
 ## 🌟 Overview
 
 The Capgemini Essay Writing Tutor is a state-of-the-art educational platform that combines artificial intelligence with professional design to provide students with comprehensive essay analysis and improvement suggestions. Built with modern web technologies and Capgemini's corporate branding, this application offers a professional-grade writing assistance experience.
