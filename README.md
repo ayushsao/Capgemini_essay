@@ -272,8 +272,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **User Guide**: Step-by-step usage instructions
 - **Troubleshooting**: Common issues and solutions
 
-### **Contact**
-- **Email**: ayushsao32@gmail.com
+### **Contact*
 - **GitHub Issues**: Report bugs and request features
 - **Discord**: Join our developer community
 
