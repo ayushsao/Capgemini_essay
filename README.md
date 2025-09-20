@@ -105,44 +105,9 @@ npm install
 yarn install
 ```
 
-3. **Environment Setup**
-Create a `.env.local` file in the root directory:
-```env
-# Firebase Configuration (Pre-configured)
-NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyB1HOfI6JzUtHFfF7HXyvRX57QLhO_gadw
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=capgemini-essay-tutor.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=capgemini-essay-tutor
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=capgemini-essay-tutor.firebasestorage.app
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=937900597976
-NEXT_PUBLIC_FIREBASE_APP_ID=1:937900597976:web:1dc56df0b6466a4201adad
-NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=G-ZQXXW5PT0Q
 
-# Optional AI API Keys
-GROQ_API_KEY=your_groq_api_key_here
-NEXT_PUBLIC_OPENAI_API_KEY=your_openai_api_key_here
 
-# Application Configuration
-NODE_ENV=development
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
-
-4. **Run the development server**
-```bash
-npm run dev
-# or
-yarn dev
-```
-
-5. **Open your browser**
-Navigate to [http://localhost:3000](http://localhost:3000) to see the application.
-
-### **Build for Production**
-```bash
-npm run build
-npm start
-```
-
-## 🎯 Core Functionality
+# 🎯 Core Functionality
 
 ### **Essay Analysis Pipeline**
 1. **Text Processing**: Advanced parsing and tokenization
@@ -311,13 +276,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Email**: ayushsao32@gmail.com
 - **GitHub Issues**: Report bugs and request features
 - **Discord**: Join our developer community
-
-### **Resources**
-- **Demo**: [Live Application Demo](https://your-demo-url.vercel.app)
-- **Documentation**: [Full Documentation](https://docs.your-site.com)
-- **Tutorial Videos**: [YouTube Playlist](https://youtube.com/playlist)
-
----
 
 ## 🎉 Acknowledgments
 
