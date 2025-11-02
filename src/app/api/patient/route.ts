@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 
-const API_URL = 'https://fedskillstest.coalitiontechnologies.workers.dev';
-const API_USERNAME = 'coalition';
-const API_PASSWORD = 'skills-test';
+const API_URL = process.env.COALITION_API_URL || 'https://fedskillstest.coalitiontechnologies.workers.dev';
+const API_USERNAME = process.env.COALITION_API_USERNAME || 'coalition';
+const API_PASSWORD = process.env.COALITION_API_PASSWORD || 'skills-test';
+const API_TIMEOUT = parseInt(process.env.COALITION_API_TIMEOUT || '5000', 10);
 
 // Mock data for Jessica Taylor (fallback when API is unavailable)
 const mockPatientData = [
@@ -125,7 +126,7 @@ export async function GET() {
       },
       cache: 'no-store',
       // Add timeout
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(API_TIMEOUT),
     });
 
     if (!response.ok) {

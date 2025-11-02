@@ -75,9 +75,11 @@ export default function PatientDashboard() {
   }
 
   // Prepare blood pressure chart data
-  const chartLabels = patient.diagnosis_history.map(
-    (item) => `${item.month.substring(0, 3)} ${item.year}`
-  );
+  const chartLabels = patient.diagnosis_history.map((item) => {
+    // Safely handle month names
+    const monthAbbr = item.month.length >= 3 ? item.month.substring(0, 3) : item.month;
+    return `${monthAbbr} ${item.year}`;
+  });
   
   const systolicData = patient.diagnosis_history.map(
     (item) => item.blood_pressure.systolic.value
@@ -136,8 +138,18 @@ export default function PatientDashboard() {
     },
   };
 
-  // Get latest diagnosis
+  // Get latest diagnosis (with safety check)
   const latestDiagnosis = patient.diagnosis_history[0];
+  
+  if (!latestDiagnosis) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <p className="text-yellow-600">No diagnosis history available for this patient</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
