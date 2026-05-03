@@ -71,7 +71,7 @@ export const signInWithGoogle = async (): Promise<GoogleAuthResult> => {
 
     // Check if user already exists in Firestore
     console.log('🔍 Checking if user exists in Firestore...');
-    let existingUser = await getUserByEmail(firebaseUser.email);
+    const existingUser = await getUserByEmail(firebaseUser.email);
 
     if (existingUser) {
       console.log('👤 Existing user found:', existingUser.name);

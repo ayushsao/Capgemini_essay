@@ -6,7 +6,6 @@ class SoundService {
   private isEnabled: boolean = true;
 
   constructor() {
-    // Initialize AudioContext only in browser environment
     if (typeof window !== 'undefined') {
       try {
         this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
